@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <?xml-stylesheet type='text/xsl' href='http://xml.resource.org/authoring/rfc2629.xslt' ?>
 <!DOCTYPE rfc SYSTEM "rfc2629.dtd">
 
@@ -93,12 +93,55 @@
 
       <section title="Query Parameters">
         <t>
-          
+          Portable Contacts defines a standard set of operations that can be used
+          to filter, sort, and paginate response results. The operations are specified
+          by adding query parameter to the request URL, either in the query string or as
+          HTTP POST data. All parameters are prefixed with pdata_ to identify them as
+          portable-data parameters. Requests may contain additional query parameters,
+          but MUST NOT contain any parameters starting with pdata_ that are not defined below.
         </t>
 
-        <section title="Selection">
+        <section title="Filtering">
           <t>
+            Filtering is used to limit the request results to Contacts that match a given
+            criterion and is accomplished by combining three request parameters:
+            
+            <list style="hanging">
+              <t hangText="pdata_filterby:">
+                Specifies the field name to filter by. If the field is not a direct child of the
+                <spanx style="verb">contact</spanx> element, the full path MUST be specified using
+                the '/' character as seperator. For example, to filter by gender the paramter value
+                is 'gender' and to filter by first name, the parameter value is 'name/givenName'.
+              </t>
+              <t hangText="pdata_filtertype:">
+                Defines the comparison method used to evaluate the field value with the value of
+                the filter criterion. Allowed values are:
+                <list style="symbols">
+                  <t>
+                    <spanx style="verb">equals</spanx>: the two values must be identical strings.
+                  </t>
+                  <t>
+                    <spanx style="verb">contains</spanx>: the entire <spanx style="verb">pdata_filtervalue</spanx>
+                    must be a substring of the Contact field value.
+                  </t>
+                  <t>
+                    <spanx style="verb">startswith</spanx>: the entire <spanx style="verb">pdata_filtervalue</spanx>
+                    must be a substring of the Contact field value, starting at the beginning of the field value. This
+                    criterion is satisfied if the two strings are equal.
+                  </t>
+                  <t>
+                    <spanx style="verb">present</spanx>: a Contact matches the criterion if the field specified by
+                    <spanx style="verb">pdata_filterby</spanx> has a non-empty value, or if it contains a non empty node
+                    for complex fields.
+                  </t>
+                </list>
+              </t>
+              <t hangText="pdata_filtervalue:">
+                Specified the value to filter by, using the comparison method defined by <spanx style="verb">pdata_filtertype</spanx>.
+              </t>
+            </list>
           </t>
+
         </section>
 
         <section title="Projection">
@@ -194,48 +237,75 @@
               Allowed values: <spanx style="verb">male</spanx>, <spanx style="verb">female</spanx>,
               and <spanx style="verb">undisclosed</spanx>.
             </t>
-            <t hangText="note:"></t>
-            <t hangText="connected:"></t>
+            <t hangText="note:">
+              0 or 1 per <spanx style="verb">contact</spanx> element with type xs:string. Text notes and comments with
+              multiple lines seperated by a line feed character (ASCII 13).
+            </t>
+            <t hangText="connected:">
+              0 or 1 <spanx style="verb">contact</spanx> element with type xs:boolean. Indicates if a two-way relationship
+              is established with the Contact.
+            </t>
             <t hangText="email:">
+              0 or more per <spanx style="verb">contact</spanx> element with REQUIRED child elements:
+              
               <list style="hanging">
-                <t hangText="type:">Enumeration: </t>
-                <t hangText="value:"></t>
+                <t hangText="type:">Enumeration: work, home, other.</t>
+                <t hangText="value:">Canonical email address (put RFC here).</t>
                 <t hangText="primary:">Boolean.</t>
               </list>
             </t>
             <t hangText="url:">
+              0 or more per <spanx style="verb">contact</spanx> element with REQUIRED child elements:
+
               <list style="hanging">
-                <t hangText="type:">Enumeration: </t>
-                <t hangText="value:"></t>
+                <t hangText="type:">Enumeration: work, home, other, blog, profile.</t>
+                <t hangText="value:">Absolute URI with any scheme.</t>
                 <t hangText="primary:">Boolean.</t>
               </list>
             </t>
             <t hangText="im:">
+              0 or more per <spanx style="verb">contact</spanx> element with REQUIRED child elements:
+
               <list style="hanging">
-                <t hangText="type:">Enumeration: </t>
-                <t hangText="value:"></t>
+                <t hangText="type:">Enumeration: aim, gtalk, icq, xmpp, msn, skype, qq, yahoo</t>
+                <t hangText="value:">Screen name</t>
                 <t hangText="primary:">Boolean.</t>
               </list>
             </t>
             <t hangText="tel:">
+              0 or more per <spanx style="verb">contact</spanx> element with REQUIRED child elements:
+
               <list style="hanging">
-                <t hangText="type:">Enumeration: </t>
-                <t hangText="value:"></t>
+                <t hangText="type:">Enumeration: work, home, other, mobile, fax, pager.</t>
+                <t hangText="value:">String.</t>
                 <t hangText="primary:">Boolean.</t>
               </list>
             </t>
             <t hangText="photo:">
+              0 or more per <spanx style="verb">contact</spanx> element with REQUIRED child elements:
+
               <list style="hanging">
-                <t hangText="type:">Enumeration: </t>
-                <t hangText="value:"></t>
+                <t hangText="type:">Enumeration: work, home, other.</t>
+                <t hangText="value:">Absolute URI of the image itself (not containing pages).</t>
                 <t hangText="primary:">Boolean.</t>
               </list>
             </t>
-            <t hangText="category:"></t>
-            <t hangText="relationship:"></t>
-            <t hangText="adr:"></t>
-            <t hangText="org:"></t>
-            <t hangText="account:"></t>
+            <t hangText="category:">
+              0 or more per <spanx style="verb">contact</spanx> element with type xs:string.
+              Holds a single user-defined tag.
+            </t>
+            <t hangText="relationship:">
+              0 or more per <spanx style="verb">contact</spanx> element with type xs:string. TBD.
+            </t>
+            <t hangText="adr:">
+              0 or more per <spanx style="verb">contact</spanx> element as defined in <xref target="adr_element" />.
+            </t>
+            <t hangText="org:">
+              0 or more per <spanx style="verb">contact</spanx> element as defined in <xref target="org_element" />.
+            </t>
+            <t hangText="account:">
+              0 or more per <spanx style="verb">contact</spanx> element as defined in <xref target="account_element" />.
+            </t>
           </list>
         </t>
       </section>
@@ -261,6 +331,72 @@
             </t>
             <t hangText="honorificSuffix:">
               0 or 1 per <spanx style="verb">name</spanx> element with type xs:string.
+            </t>
+          </list>
+        </t>
+      </section>
+
+      <section title="adr Element" anchor="adr_element">
+        <t>
+          <list style="hanging">
+            <t hangText="street:">
+              0 or more per <spanx style="verb">adr</spanx> element with type xs:string.
+            </t>
+            <t hangText="locality:">
+              0 or 1 per <spanx style="verb">adr</spanx> element with type xs:string.
+            </t>
+            <t hangText="region:">
+              0 or 1 per <spanx style="verb">adr</spanx> element with type xs:string.
+            </t>
+            <t hangText="postalCode:">
+              0 or 1 per <spanx style="verb">adr</spanx> element with type xs:string.
+            </t>
+            <t hangText="country:">
+              1 per <spanx style="verb">adr</spanx> element with type xs:string.
+            </t>
+            <t hangText="label:">
+              0 or more per <spanx style="verb">adr</spanx> element with type xs:string.
+            </t>
+          </list>
+        </t>
+      </section>
+
+      <section title="org Element" anchor="org_element">
+        <t>
+          <list style="hanging">
+            <t hangText="name:">
+              1 per <spanx style="verb">org</spanx> element with type xs:string.
+            </t>
+            <t hangText="department:">
+              0 or 1 per <spanx style="verb">org</spanx> element with type xs:string.
+            </t>
+            <t hangText="title:">
+              0 or 1 per <spanx style="verb">org</spanx> element with type xs:string.
+            </t>
+            <t hangText="startDate:">
+              0 or 1 per <spanx style="verb">org</spanx> element with type xs:date.
+            </t>
+            <t hangText="endDate:">
+              0 or 1 per <spanx style="verb">org</spanx> element with type xs:date.
+            </t>
+            <t hangText="location:">
+              0 or 1 per <spanx style="verb">org</spanx> element with type xs:string.
+            </t>
+            <t hangText="description:">
+              0 or 1 per <spanx style="verb">org</spanx> element with type xs:string.
+            </t>
+          </list>
+        </t>
+      </section>
+
+      <section title="account Element" anchor="account_element">
+        <t>
+          <list style="hanging">
+            <t hangText="domain:">
+              1 per <spanx style="verb">account</spanx> element with type xs:string.
+            </t>
+            <t hangText="localId:">
+              1 per <spanx style="verb">account</spanx> element with type xs:string.
             </t>
           </list>
         </t>
