@@ -1,0 +1,323 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml-stylesheet type='text/xsl' href='http://xml.resource.org/authoring/rfc2629.xslt' ?>
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd">
+
+<rfc category="info" ipr="full3978" docName="portable_contacts-1_0.xml">
+
+  <?rfc toc="yes" ?>
+  <?rfc tocdepth="3" ?>
+  <?rfc symrefs="yes" ?>
+  <?rfc sortrefs="yes"?>
+  <?rfc strict="yes" ?>
+  <?rfc iprnotified="no" ?>
+  <?rfc private="Implementers' Draft" ?>
+
+  <front>
+    <title>Portable Contacts 1.0 Draft A</title>
+
+    <author initials="J" surname="Smarr" fullname="Joseph Smarr">
+      <organization>Plaxo</organization>
+      <address>
+        <email>joseph@plaxo.com</email>
+      </address>
+    </author>
+
+    <author initials="E" surname="Hammer-Lahav" fullname="Eran Hammer-Lahav">
+      <organization>Yahoo!</organization>
+      <address>
+        <email>eran@hueniverse.com</email>
+      </address>
+    </author>
+
+    <date day="4" month="June" year="2008"/>
+
+    <abstract>
+      <t>
+        The goal of Portable Contacts is to make it easier for developers to give their
+        users a secure way to access the address books and friends lists they have built
+        up all over the web. Specifically, it seeks to create a common access pattern and
+        contact schema that any site can provide, a well-specified authentication and access rules,
+        standard libraries that can work with any site, and absolutely minimal complexity,
+        with the lightest possible toolchain requirements for developers.
+      </t>
+    </abstract>
+
+  </front>
+  <middle>
+
+    <section title="Notation and Conventions">
+      <t>
+        The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+        "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+        document are to be interpreted as described in <xref target="RFC2119" />.
+        Domain name examples use <xref target="RFC2606" />.
+      </t>
+    </section>
+
+    <section title="Definitions">
+      <t>
+        <list style="hanging">
+          <t hangText="Contact:">
+            .
+          </t>
+          <t hangText="Service Provider:">
+            A web application that provides Contacts information
+            via the Portable Contacts protocol.
+          </t>
+          <t hangText="Consumer:">
+            A website or application that uses the Portable Contacts protocol
+            to request contacts managed by the Service Provider.
+          </t>
+        </list>
+      </t>
+    </section>
+
+    <section title="Overview">
+      <t>
+      </t>
+    </section>
+
+    <section title="Discovery">
+      <t>
+      </t>
+    </section>
+
+    <section title="Invocation">
+      <t>
+      </t>
+
+      <section title="Authentication and Authorization">
+        <t>
+        </t>
+      </section>
+
+      <section title="Query Parameters">
+        <t>
+          
+        </t>
+
+        <section title="Selection">
+          <t>
+          </t>
+        </section>
+
+        <section title="Projection">
+          <t>
+          </t>
+        </section>
+
+        <section title="Pagination">
+          <t>
+          </t>
+        </section>
+
+        <section title="Sorting">
+          <t>
+          </t>
+        </section>
+
+      </section>
+
+      <section title="Response Format">
+        <t>
+        </t>
+      </section>
+
+    </section>
+
+    <section title="Contact Schema">
+      <t>
+        The Contact schema defines the containers and attributes used to deliver
+        an individual Contact or a list of Contacts as requested by the Consumer.
+      </t>
+
+      <section title="Structure">
+        <t>
+          Contact information is formatted using labeled attributes with either
+          structured or unstructured string data. Each attributes has a defined
+          occurrence count and use one of the following types:
+
+          <list style="hanging">
+            <t hangText="Simple:">
+              A single string attribute which MAY specify a REQUIRED data format or allow
+              any string.
+            </t>
+            <t hangText="Enumeration:">
+              A single string attribute with a defined set of allowed values. Service Providers
+              MAY extend the schema to include additional enumeration values, but SHOULD prefix
+              them with a unique namespace as defined in <xref target="namespaces" />.
+            </t>
+            <t hangText="Boolean">
+              An attribute with one of two allowed values: <spanx style="verb">true</spanx> and
+              <spanx style="verb">false</spanx>. Values are case-sensitive.
+            </t>
+            <t hangText="Complex:">
+              A multi-value attribute containing any combination of other attributes. Complex
+              attributes are defined by listing the child attributes and their types.
+            </t>
+          </list>
+        </t>
+      </section>
+
+      <section title="Namespaces" anchor="namespaces">
+        <t>
+        </t>
+      </section>
+
+      <section title="contact Element">
+        <t>
+          <list style="hanging">
+            <t hangText="uid:">
+              1 per <spanx style="verb">contact</spanx> element with type xs:string.
+              Unique identifier for the Contact.
+            </t>
+            <t hangText="created:">
+              0 or 1 per <spanx style="verb">contact</spanx> element with type xs:dateTime.
+            </t>
+            <t hangText="modified:">
+              0 or 1 per <spanx style="verb">contact</spanx> element with type xs:dateTime.
+            </t>
+            <t hangText="name:">
+              1 per <spanx style="verb">contact</spanx> element as defined in <xref target="name_element" />.
+            </t>
+            <t hangText="bday:">
+              0 or 1 per <spanx style="verb">contact</spanx> element with type xs:date. The
+              year value MAY be set to <spanx style="verb">0000</spanx> when the age of the
+              Contact is private or the year is not available.
+            </t>
+            <t hangText="anniversary:">
+              0 or 1 per <spanx style="verb">contact</spanx> element with type xs:date. The
+              year value MAY be set to <spanx style="verb">0000</spanx> when the year is not available.
+            </t>
+            <t hangText="gender:">
+              0 or 1 per <spanx style="verb">contact</spanx> element with type enumeration.
+              Allowed values: <spanx style="verb">male</spanx>, <spanx style="verb">female</spanx>,
+              and <spanx style="verb">undisclosed</spanx>.
+            </t>
+            <t hangText="note:"></t>
+            <t hangText="connected:"></t>
+            <t hangText="email:">
+              <list style="hanging">
+                <t hangText="type:">Enumeration: </t>
+                <t hangText="value:"></t>
+                <t hangText="primary:">Boolean.</t>
+              </list>
+            </t>
+            <t hangText="url:">
+              <list style="hanging">
+                <t hangText="type:">Enumeration: </t>
+                <t hangText="value:"></t>
+                <t hangText="primary:">Boolean.</t>
+              </list>
+            </t>
+            <t hangText="im:">
+              <list style="hanging">
+                <t hangText="type:">Enumeration: </t>
+                <t hangText="value:"></t>
+                <t hangText="primary:">Boolean.</t>
+              </list>
+            </t>
+            <t hangText="tel:">
+              <list style="hanging">
+                <t hangText="type:">Enumeration: </t>
+                <t hangText="value:"></t>
+                <t hangText="primary:">Boolean.</t>
+              </list>
+            </t>
+            <t hangText="photo:">
+              <list style="hanging">
+                <t hangText="type:">Enumeration: </t>
+                <t hangText="value:"></t>
+                <t hangText="primary:">Boolean.</t>
+              </list>
+            </t>
+            <t hangText="category:"></t>
+            <t hangText="relationship:"></t>
+            <t hangText="adr:"></t>
+            <t hangText="org:"></t>
+            <t hangText="account:"></t>
+          </list>
+        </t>
+      </section>
+
+      <section title="name Element" anchor="name_element">
+        <t>
+          <list style="hanging">
+            <t hangText="fn:">
+              1 per <spanx style="verb">name</spanx> element with type xs:string.
+              Full name or the common display name.
+            </t>
+            <t hangText="familyName:">
+              0 or 1 per <spanx style="verb">name</spanx> element with type xs:string.
+            </t>
+            <t hangText="givenName:">
+              0 or 1 per <spanx style="verb">name</spanx> element with type xs:string.
+            </t>
+            <t hangText="middleName:">
+              0 or 1 per <spanx style="verb">name</spanx> element with type xs:string.
+            </t>
+            <t hangText="honorificPrefix:">
+              0 or 1 per <spanx style="verb">name</spanx> element with type xs:string.
+            </t>
+            <t hangText="honorificSuffix:">
+              0 or 1 per <spanx style="verb">name</spanx> element with type xs:string.
+            </t>
+          </list>
+        </t>
+      </section>
+
+    </section>
+
+    <section title="Security and Privacy Considerations">
+      <t>
+      </t>
+    </section>
+
+    <appendix title="Appendix A - Example">
+      <t>
+      </t>
+    </appendix>
+
+  </middle>
+
+  <back>
+
+    <references title="References">
+
+      <reference anchor="OAuth Core 1.0">
+        <front>
+          <title>OAuth Core 1.0</title>
+          <author initials="" surname="OAuth Core Workgroup" fullname="OAuth Core Workgroup">
+            <organization />
+          </author>
+        </front>
+        <format type="HTML" target="http://oauth.net/core/1.0" />
+      </reference>
+
+      <reference anchor="RFC2606">
+        <front>
+          <title>Reserved Top Level DNS Names</title>
+          <author initials="D.E" surname="Eastlake" fullname="D. Eastlake">
+            <organization></organization>
+          </author>
+          <author initials="A.P" surname="Panitz" fullname="A. Panitz">
+            <organization></organization>
+          </author>
+        </front>
+        <seriesInfo name="RFC" value="2606" />
+      </reference>
+
+      <reference anchor="RFC2119">
+        <front>
+          <title>Key words for use in RFCs to Indicate Requirement Levels</title>
+          <author initials="B.S" surname="Bradner" fullname="Scott Bradner">
+            <organization>Alis Technologies</organization>
+          </author>
+        </front>
+        <seriesInfo name="RFC" value="2119" />
+      </reference>
+
+    </references>
+  </back>
+
+</rfc>
