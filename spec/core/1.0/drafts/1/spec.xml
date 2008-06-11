@@ -22,14 +22,7 @@
       </address>
     </author>
 
-    <author initials="E" surname="Hammer-Lahav" fullname="Eran Hammer-Lahav">
-      <organization>Yahoo!</organization>
-      <address>
-        <email>eran@hueniverse.com</email>
-      </address>
-    </author>
-
-    <date day="4" month="June" year="2008"/>
+    <date day="11" month="June" year="2008"/>
 
     <abstract>
       <t>
@@ -99,89 +92,13 @@
           Portable Contacts defines a standard set of operations that can be used
           to filter, sort, and paginate response results. The operations are specified
           by adding query parameter to the request URL, either in the query string or as
-          HTTP POST data. All parameters are prefixed with pdata_ to identify them as
-          portable-data parameters. Requests may contain additional query parameters,
-          but MUST NOT contain any parameters starting with pdata_ that are not defined below.
-        </t>
-        <t>
-          Filtering parameters
-
-          Name: 	filterBy
-          Value: 	any top-level field name, e.g. fn or email
-          Default: 	empty (return all results)
-          Effect: 	Only contacts that match the criteria specified by filterOp and filterValue when applied to the value of the specified field will be returned. If the specified field name is of a Plural Field, a contact matches if any of the fields of that type match the criteria.
-
-          Name: 	filterOp
-          Value: 	One of the following: equals, contains, startswith, present
-          Default: 	equals
-          Effect: 	Specifies the matching criteria for filterValue to be compared with the field(s) of type filterBy (hereafter “the Value”). The specific semantics of each filterOp when comparing filterValue to the Value are:
-          equals: the two values must be identical strings.
-          contains: the entire filterValue must be a substring of the Value
-          startswith: the entire filterValue must be a substring of the Value, starting at the beginning of the Value (this criterion is satisfied if the two strings are equal)
-          present: true if the Value is non-empty (if the field specified by filterBy is a Singular Field), or if there is at least one non-empty value (if the field specified by filterBy is a Plural Field), or if at least one of the Component Fields of the field specified by filterBy is non-empty (if the field specified is a Plural Bundle Field)
-
-          Name: 	filterValue
-          Value: 	any string (e.g. Joseph Smarr or Jos)
-          Default: 	empty
-          Effect: 	Specifies the value to compare against the field value specified by filterBy according to the criteria specified by filterOp
-
-
-          Name: 	<spanx style="verb">modifiedSince</spanx>
-          Value: 	An XSD date-time, e.g. 2008-06-04 12:34:56-00:00
-          Default: 	empty (return all results)
-          Effect: 	Returns only contacts that have been modified at or after the given time, i.e. whose modified value is greater than or equal to the given value. This can be used independently of other filters to efficiently enable a basic syndication pattern when accessing the same data over time. The first API call returns all data, which can be stored locally. Subsequent API calls can specify <spanx style="verb">modifiedSince</spanx> with the time of the last API call, so that only contacts that have been added or modified since the last API call will be returned.
-
-          Name: 	<spanx style="verb">fields</spanx>
-          Value: 	One or more top-level fields, delimited by comma (,), e.g. fn or fn,email,photo
-          Default: 	empty (return all fields for each contact)
-          Effect: 	If non-empty, each contact returned MUST NOT contain any fields that are not contained in the given list of fields. Note that the Service Provider is not required to return fields in the given list if they are not normally supported fields. This field is used for efficiency when the client only wishes to access a subset of the fields normally returned in results.
-
-          Sorting parameters
-
-          Name: 	<spanx style="verb">sortBy</spanx>
-          Value: 	any top-level field, e.g. fn or email
-          Default: 	empty (unspecified sort order)
-          Effect: 	If present, the returned contacts MUST be sorted according to the given field, in the order specified by <spanx style="verb">sortOrder</spanx>. If <spanx style="verb">sortBy</spanx> is a Singular Field, contacts are sorted according to that field’s value; if it’s a Plural Field, contacts are sorted by the Value (or Major Value, if it’s a Plural Bundle Field) of the field marked with “primary”: “true”, if any, or else the first value in the list, if any, or else they are sorted last if the given contact has no data for the given field.
-
-          Name: 	<spanx style="verb">sortOrder</spanx>
-          Value: 	One of the following: ascending, descending
-          Default: 	ascending
-          Effect: 	Specifies the directional order in which contacts should be sorted, according to the criteria given in <spanx style="verb">sortBy</spanx>. Sort order is expected to be Unicode alphabetic sort order, with no specific locale implied.
-
-          Pagination parameters
-
-          Name: 	<spanx style="verb">startIndex</spanx>
-          Value: 	Any non-negative integer
-          Default: 	0
-          Effect: 	Specifies the offset of the first result to be returned with respect to the list of contacts that would be returned if no offset were provided. For instance, if in a given request 10 contacts would normally be provided, if <spanx style="verb">startIndex</spanx> is 7 and no <spanx style="verb">limit</spanx> is specified, then only the last 3 contacts in that list would be returned (contacts are zero-indexed). If <spanx style="verb">startIndex</spanx> is greater than or equal to the total number of results that would be returned, no contacts are returned.
-
-          Name: 	<spanx style="verb">limit</spanx>
-          Value: 	Any non-negative integer
-          Default: 	0 (return all contacts)
-          Effect: 	If non-zero, specifies the maximum number of contacts the service provider will return. Specifying a <spanx style="verb">limit</spanx> of 0 means that no limit should be placed on the number of contacts returned. Otherwise, at most <spanx style="verb">limit</spanx> contacts will be returned, starting at <spanx style="verb">startIndex</spanx> and counting up from there.
-
-          The <spanx style="verb">startIndex</spanx> and <spanx style="verb">limit</spanx> parameters can be used together to “page through” a large number of results. For instance, on an initial query, specifying <spanx style="verb">startIndex</spanx>=0&amp;<spanx style="verb">limit</spanx>=10 will return the first only the first 10 results. The total number of possible results is indicated by the totalCount field of results, so the client knows how many “pages” of results exist. A subsequent query of <spanx style="verb">startIndex</spanx>=10&amp;<spanx style="verb">limit</spanx>=10 will return the next 10 results, and so on.
-
-          Output parameters
-
-          In addition to the parameters above, Portable Contacts specifies two output parameters that specify the entire response body. These parameters are not prefixed with pdata_ because they are general-purpose parameters that are already commonly used with these parameter names in other unrelated APIs.
-
-          Name: 	format
-          Value: 	One of the following: json, xml
-          Default: 	json
-          Effect: 	Specifies the format in which the response data is returned: JSON (see http://json.org) or XML (http://www.w3.org/XML/). The data structure returned is equivalent in both formats; the only difference is in the encoding of the data. Singlular Fields are encoded as string key/value pairs in JSON and tags with text content in XML, e.g. “field”: “value” and &lt;field&gt;value&lt;/field&gt; respectively. Plural Fields and Plural Bundles are encoded as arrays in JSON and repeated tags in XML, e.g. “field”: [ “value1”, “value2” ] and &lt;field&gt;value1&lt;/field&gt;&lt;field&lt;value2&lt;/field&gt; respectively. Nodes with multiple sub-nodes are represented as objects in JSON and tags with sub-tags in XML, e.g. “field”: { “subfield1”: “value1”, “subfield2”: “value2” } and &lt;field&gt;&lt;subfield1&gt;&lt;value1&gt;&lt;/subfield1&gt;&lt;subfield2&gt;value2&lt;/subfield2&gt;&lt;/field&gt; respectively.
-
-          Name: 	callback
-          Value: 	JavaScript callback function name. Callback function names may only use upper and lowercase alphabetic characters (A-Z, a-z), numbers (0-9), the period (.), the underscore (_), and brackets ([ and ]). Brackets must be URL-encoded.
-          Default: 	empty (no callback function name)
-          Effect: 	Only applies if format=json, if so, the output is wrapped in a call to the given callback function, for use with AJAX JSON-P callback invocation. For instance, if the result would normally be { “field”: “value” } and callback=myFunc, the output would be myFunc({“field”: “value”}); See http://developer.yahoo.com/common/json.html#callbackparam for more information.
-
+          HTTP POST data.
         </t>
 
         <section title="Filtering">
           <t>
             Filtering is used to limit the request results to Contacts that match a given
-            criterion and is accomplished by combining three request parameters:
+            criterion. Content filtering is accomplished by combining three request parameters:
 
             <list style="hanging">
               <t hangText="filterBy:">
@@ -215,6 +132,20 @@
               </t>
               <t hangText="filterValue:">
                 Specified the value to filter by, using the comparison method defined by <spanx style="verb">filterOp</spanx>.
+              </t>
+            </list>
+          </t>
+          <t>
+            In addition, requests can filter content based on their update timestamp:
+            
+            <list style="hanging">
+              <t hangText="modifiedSince:">
+                Returns only contacts that have been modified on or after the given time, specified
+                as an xs:dateTime. The filter is based on the value of the <spanx style="verb">modified</spanx> field,
+                and can be used independently of other filters or combined. It enables a basic syndication pattern when
+                accessing the same data over time. The first API call returns all data, which can be stored locally.
+                Subsequent API calls can specify <spanx style="verb">modifiedSince</spanx> with the time of the last
+                API call, so that only contacts that have been added or modified since the last API call will be returned.
               </t>
             </list>
           </t>
@@ -253,18 +184,99 @@
 
         </section>
 
-        <section title="Projection">
+        <section title="Sorting">
           <t>
+            Sorting allows requests to specify the order in which contacts are returned.
+            
+            <list style="hanging">
+              <t hangText="sortBy">
+                Specifies the field name whose value SHALL be used to order the returned Contacts.
+                The sort order is determine by the <spanx style="verb">sortOrder</spanx> parameter.
+                If <spanx style="verb">sortBy</spanx> is a Singular Field, contacts are sorted according
+                to that field’s value; if it’s a Plural Field, contacts are sorted by the Value
+                (or Major Value, if it’s a Plural Bundle Field) of the field marked with “primary”: “true”,
+                if any, or else the first value in the list, if any, or else they are sorted last if the
+                given contact has no data for the given field.
+              </t>
+              <t hangText="sortOrder">
+                The order in which the <spanx style="verb">sortBy</spanx> parameter is applied. Allowed values
+                are <spanx style="verb">ascending</spanx> and <spanx style="verb">descending</spanx>. If none specified
+                the sort order defaults to <spanx style="verb">ascending</spanx>. Sort order is expected to be
+                Unicode alphabetic sort order, with no specific locale implied.
+              </t>
+            </list>
           </t>
         </section>
 
         <section title="Pagination">
           <t>
+            The pagination parameters can be used together to “page through” a large number of results:
+            
+            <list style="hanging">
+              <t hangText="startIndex:">
+                Specifies the offset of the first result to be returned with respect to the list
+                of contacts that would be returned if no offset were provided. For instance, if
+                in a given request 10 contacts would normally be provided, if <spanx style="verb">startIndex</spanx>
+                is 7 and no <spanx style="verb">limit</spanx> is specified, then only the last 3 contacts in that
+                list would be returned (contacts are zero-indexed). If <spanx style="verb">startIndex</spanx> is
+                greater than or equal to the total number of results that would be returned, no contacts are returned.
+                Value MUST be a non-negative integer and defaults to 0 if none specified.
+              </t>
+              <t hangText="limit:">
+                If non-zero, specifies the maximum number of contacts the service provider will return.
+                Value MUST be a non-negative integer and defaults to 0 if none is specified. Specifying
+                a <spanx style="verb">limit</spanx> of 0 means that no limit should be placed
+                on the number of contacts returned. Otherwise, at most <spanx style="verb">limit</spanx>
+                contacts will be returned, starting at <spanx style="verb">startIndex</spanx> and counting
+                up from there.
+              </t>
+            </list>
+            
+            For instance, on an initial query, specifying <spanx style="verb">startIndex=0&amp;limit=10</spanx>
+            will return the first only the first 10 results. The total number of possible results is indicated
+            by the totalCount field of results, so the client knows how many “pages” of results exist.
+            A subsequent query of <spanx style="verb">startIndex=10&amp;limit=10</spanx> will return the next
+            10 results, and so on.
           </t>
         </section>
 
-        <section title="Sorting">
+        <section title="Presentation">
           <t>
+            Presentation controls the format, makeup, and delivery mechanism for delivering the requested
+            result set:
+            
+            <list style="hanging">
+              <t hangText="format:">
+                Specifies the format in which the response data is returned. Supports: JSON (http://json.org)
+                or XML (http://www.w3.org/XML/) and defaults to JSON is none specified.
+                The data structure returned is equivalent in both formats,
+                with the only difference is in the encoding of the data. Singlular Fields are encoded as string
+                key/value pairs in JSON and tags with text content in XML, e.g. “field”: “value” and
+                &lt;field&gt;value&lt;/field&gt; respectively. Plural Fields and Plural Bundles are encoded as
+                arrays in JSON and repeated tags in XML, e.g. “field”: [ “value1”, “value2” ] and
+                &lt;field&gt;value1&lt;/field&gt;&lt;field&lt;value2&lt;/field&gt; respectively.
+                Nodes with multiple sub-nodes are represented as objects in JSON and tags with
+                sub-tags in XML, e.g. “field”: { “subfield1”: “value1”, “subfield2”: “value2” }
+                and &lt;field&gt;&lt;subfield1&gt;&lt;value1&gt;&lt;/subfield1&gt;&lt;subfield2&gt;value2&lt;/subfield2&gt;&lt;/field&gt;
+                respectively.
+              </t>
+              <t hangText="fields:">
+                If non-empty, each contact returned SHALL contain only the fields explicitly requested.
+                Service Provider MAY return a subset of the requested fields if they are not supported.
+                This field is used for efficiency when the client only wishes to access a subset of the
+                fields normally returned in results. Value is a comma seperated list of top level field names
+                and defaults to an emply list which means all fields.
+              </t>
+              <t hangText="callback:">
+                Only applies if format=json, if so, the output is wrapped in a call to the given callback
+                function, for use with AJAX JSON-P callback invocation. For instance, if the result would
+                normally be { “field”: “value” } and callback=myFunc, the output would be myFunc({“field”: “value”});
+                See http://developer.yahoo.com/common/json.html#callbackparam for more information. Value
+                is a JavaScript callback function name. Callback function names may only use upper and
+                lowercase alphabetic characters (A-Z, a-z), numbers (0-9), the period (.), the underscore (_),
+                and brackets ([ and ]). Brackets must be URL-encoded.
+              </t>
+            </list>
           </t>
         </section>
 
