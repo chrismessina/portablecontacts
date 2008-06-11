@@ -79,6 +79,9 @@
 
     <section title="Discovery">
       <t>
+        Portable contacts API endpoint is discoverable from the domain root using XRDS-Simple (YADIS).
+        Will specify new URI type for this service.
+        Endpoint is base URL for API; additional path and query vars can be appended during invocation.
       </t>
     </section>
 
@@ -100,20 +103,94 @@
           portable-data parameters. Requests may contain additional query parameters,
           but MUST NOT contain any parameters starting with pdata_ that are not defined below.
         </t>
+        <t>
+          Filtering parameters
+
+          Name: 	filterBy
+          Value: 	any top-level field name, e.g. fn or email
+          Default: 	empty (return all results)
+          Effect: 	Only contacts that match the criteria specified by filterOp and filterValue when applied to the value of the specified field will be returned. If the specified field name is of a Plural Field, a contact matches if any of the fields of that type match the criteria.
+
+          Name: 	filterOp
+          Value: 	One of the following: equals, contains, startswith, present
+          Default: 	equals
+          Effect: 	Specifies the matching criteria for filterValue to be compared with the field(s) of type filterBy (hereafter “the Value”). The specific semantics of each filterOp when comparing filterValue to the Value are:
+          equals: the two values must be identical strings.
+          contains: the entire filterValue must be a substring of the Value
+          startswith: the entire filterValue must be a substring of the Value, starting at the beginning of the Value (this criterion is satisfied if the two strings are equal)
+          present: true if the Value is non-empty (if the field specified by filterBy is a Singular Field), or if there is at least one non-empty value (if the field specified by filterBy is a Plural Field), or if at least one of the Component Fields of the field specified by filterBy is non-empty (if the field specified is a Plural Bundle Field)
+
+          Name: 	filterValue
+          Value: 	any string (e.g. Joseph Smarr or Jos)
+          Default: 	empty
+          Effect: 	Specifies the value to compare against the field value specified by filterBy according to the criteria specified by filterOp
+
+
+          Name: 	<spanx style="verb">modifiedSince</spanx>
+          Value: 	An XSD date-time, e.g. 2008-06-04 12:34:56-00:00
+          Default: 	empty (return all results)
+          Effect: 	Returns only contacts that have been modified at or after the given time, i.e. whose modified value is greater than or equal to the given value. This can be used independently of other filters to efficiently enable a basic syndication pattern when accessing the same data over time. The first API call returns all data, which can be stored locally. Subsequent API calls can specify <spanx style="verb">modifiedSince</spanx> with the time of the last API call, so that only contacts that have been added or modified since the last API call will be returned.
+
+          Name: 	<spanx style="verb">fields</spanx>
+          Value: 	One or more top-level fields, delimited by comma (,), e.g. fn or fn,email,photo
+          Default: 	empty (return all fields for each contact)
+          Effect: 	If non-empty, each contact returned MUST NOT contain any fields that are not contained in the given list of fields. Note that the Service Provider is not required to return fields in the given list if they are not normally supported fields. This field is used for efficiency when the client only wishes to access a subset of the fields normally returned in results.
+
+          Sorting parameters
+
+          Name: 	<spanx style="verb">sortBy</spanx>
+          Value: 	any top-level field, e.g. fn or email
+          Default: 	empty (unspecified sort order)
+          Effect: 	If present, the returned contacts MUST be sorted according to the given field, in the order specified by <spanx style="verb">sortOrder</spanx>. If <spanx style="verb">sortBy</spanx> is a Singular Field, contacts are sorted according to that field’s value; if it’s a Plural Field, contacts are sorted by the Value (or Major Value, if it’s a Plural Bundle Field) of the field marked with “primary”: “true”, if any, or else the first value in the list, if any, or else they are sorted last if the given contact has no data for the given field.
+
+          Name: 	<spanx style="verb">sortOrder</spanx>
+          Value: 	One of the following: ascending, descending
+          Default: 	ascending
+          Effect: 	Specifies the directional order in which contacts should be sorted, according to the criteria given in <spanx style="verb">sortBy</spanx>. Sort order is expected to be Unicode alphabetic sort order, with no specific locale implied.
+
+          Pagination parameters
+
+          Name: 	<spanx style="verb">startIndex</spanx>
+          Value: 	Any non-negative integer
+          Default: 	0
+          Effect: 	Specifies the offset of the first result to be returned with respect to the list of contacts that would be returned if no offset were provided. For instance, if in a given request 10 contacts would normally be provided, if <spanx style="verb">startIndex</spanx> is 7 and no <spanx style="verb">limit</spanx> is specified, then only the last 3 contacts in that list would be returned (contacts are zero-indexed). If <spanx style="verb">startIndex</spanx> is greater than or equal to the total number of results that would be returned, no contacts are returned.
+
+          Name: 	<spanx style="verb">limit</spanx>
+          Value: 	Any non-negative integer
+          Default: 	0 (return all contacts)
+          Effect: 	If non-zero, specifies the maximum number of contacts the service provider will return. Specifying a <spanx style="verb">limit</spanx> of 0 means that no limit should be placed on the number of contacts returned. Otherwise, at most <spanx style="verb">limit</spanx> contacts will be returned, starting at <spanx style="verb">startIndex</spanx> and counting up from there.
+
+          The <spanx style="verb">startIndex</spanx> and <spanx style="verb">limit</spanx> parameters can be used together to “page through” a large number of results. For instance, on an initial query, specifying <spanx style="verb">startIndex</spanx>=0&amp;<spanx style="verb">limit</spanx>=10 will return the first only the first 10 results. The total number of possible results is indicated by the totalCount field of results, so the client knows how many “pages” of results exist. A subsequent query of <spanx style="verb">startIndex</spanx>=10&amp;<spanx style="verb">limit</spanx>=10 will return the next 10 results, and so on.
+
+          Output parameters
+
+          In addition to the parameters above, Portable Contacts specifies two output parameters that specify the entire response body. These parameters are not prefixed with pdata_ because they are general-purpose parameters that are already commonly used with these parameter names in other unrelated APIs.
+
+          Name: 	format
+          Value: 	One of the following: json, xml
+          Default: 	json
+          Effect: 	Specifies the format in which the response data is returned: JSON (see http://json.org) or XML (http://www.w3.org/XML/). The data structure returned is equivalent in both formats; the only difference is in the encoding of the data. Singlular Fields are encoded as string key/value pairs in JSON and tags with text content in XML, e.g. “field”: “value” and &lt;field&gt;value&lt;/field&gt; respectively. Plural Fields and Plural Bundles are encoded as arrays in JSON and repeated tags in XML, e.g. “field”: [ “value1”, “value2” ] and &lt;field&gt;value1&lt;/field&gt;&lt;field&lt;value2&lt;/field&gt; respectively. Nodes with multiple sub-nodes are represented as objects in JSON and tags with sub-tags in XML, e.g. “field”: { “subfield1”: “value1”, “subfield2”: “value2” } and &lt;field&gt;&lt;subfield1&gt;&lt;value1&gt;&lt;/subfield1&gt;&lt;subfield2&gt;value2&lt;/subfield2&gt;&lt;/field&gt; respectively.
+
+          Name: 	callback
+          Value: 	JavaScript callback function name. Callback function names may only use upper and lowercase alphabetic characters (A-Z, a-z), numbers (0-9), the period (.), the underscore (_), and brackets ([ and ]). Brackets must be URL-encoded.
+          Default: 	empty (no callback function name)
+          Effect: 	Only applies if format=json, if so, the output is wrapped in a call to the given callback function, for use with AJAX JSON-P callback invocation. For instance, if the result would normally be { “field”: “value” } and callback=myFunc, the output would be myFunc({“field”: “value”}); See http://developer.yahoo.com/common/json.html#callbackparam for more information.
+
+        </t>
 
         <section title="Filtering">
           <t>
             Filtering is used to limit the request results to Contacts that match a given
             criterion and is accomplished by combining three request parameters:
-            
+
             <list style="hanging">
-              <t hangText="pdata_filterby:">
+              <t hangText="filterBy:">
                 Specifies the field name to filter by. If the field is not a direct child of the
                 <spanx style="verb">contact</spanx> element, the full path MUST be specified using
                 the '/' character as seperator. For example, to filter by gender the paramter value
                 is 'gender' and to filter by first name, the parameter value is 'name/givenName'.
               </t>
-              <t hangText="pdata_filtertype:">
+              <t hangText="filterOp:">
                 Defines the comparison method used to evaluate the field value with the value of
                 the filter criterion. Allowed values are:
                 <list style="symbols">
@@ -121,25 +198,57 @@
                     <spanx style="verb">equals</spanx>: the two values must be identical strings.
                   </t>
                   <t>
-                    <spanx style="verb">contains</spanx>: the entire <spanx style="verb">pdata_filtervalue</spanx>
+                    <spanx style="verb">contains</spanx>: the entire <spanx style="verb">filterValue</spanx>
                     must be a substring of the Contact field value.
                   </t>
                   <t>
-                    <spanx style="verb">startswith</spanx>: the entire <spanx style="verb">pdata_filtervalue</spanx>
+                    <spanx style="verb">startswith</spanx>: the entire <spanx style="verb">filterValue</spanx>
                     must be a substring of the Contact field value, starting at the beginning of the field value. This
                     criterion is satisfied if the two strings are equal.
                   </t>
                   <t>
                     <spanx style="verb">present</spanx>: a Contact matches the criterion if the field specified by
-                    <spanx style="verb">pdata_filterby</spanx> has a non-empty value, or if it contains a non empty node
+                    <spanx style="verb">filterBy</spanx> has a non-empty value, or if it contains a non empty node
                     for complex fields.
                   </t>
                 </list>
               </t>
-              <t hangText="pdata_filtervalue:">
-                Specified the value to filter by, using the comparison method defined by <spanx style="verb">pdata_filtertype</spanx>.
+              <t hangText="filterValue:">
+                Specified the value to filter by, using the comparison method defined by <spanx style="verb">filterOp</spanx>.
               </t>
             </list>
+          </t>
+          <t>
+            Here are a few illustrative examples of filtering matches with <spanx style="verb">filterBy</spanx>,
+            <spanx style="verb">filterOp</spanx>, and <spanx style="verb">filterValue</spanx>.
+            In each case, assume the following two contacts would be returned if no filtering parameters were provided:
+            
+          <figure>
+            <artwork>
+      {
+        "id": "1",
+        "name": "Chris Messina",
+        "url": [
+          { "value": "http://factoryjoe.com/blog", "type": "blog" }
+        ]
+      },
+      {
+        "id": "2",
+        "name": "Joseph Smarr",
+        "email": [
+          { "value": "joseph@plaxo.com", "type": "work", "primary": "true" },
+          { "value": "jsmarr@gmail.com", "type": "home" }
+        ],
+      }
+            </artwork>
+          </figure>
+
+            Given the parameters <spanx style="verb">filterBy=name&amp;filterOp=startswith&amp;filterValue=Chr</spanx>,
+            only the first contact (with id=1) would match and be returned. However, with
+            parameters <spanx style="verb">filterBy=name&amp;filterOp=present</spanx>, both contacts would be returned.
+            Given the parameters <spanx style="verb">filterBy=email&amp;filterOp=contains&amp;filterValue=plaxo.com</spanx>,
+            only the second contact (with id=2) would match, as would it be the only contact
+            to match given the parameters <spanx style="verb">filterBy=email&amp;filterOp=present</spanx>.
           </t>
 
         </section>
@@ -163,6 +272,65 @@
 
       <section title="Response Format">
         <t>
+        </t>
+      </section>
+
+      <section title="Error Codes">
+        <t>
+          The Service Provider MUST return a response code with every response.
+          Response codes are numeric and based on existing HTTP response codes,
+          as defined below. In addition to the response code, Service Providers
+          SHOULD also provide a human-readable reason that explains the reason
+          for the response code. This message SHOULD be intelligible to
+          developers, but MAY be unsuitable for display to end-users.
+          Clients SHOULD provide their own appropriate error message to users
+          when encountering an error response.
+        </t>
+        <t>
+          Service Providers SHOULD send their response code and message via the
+          HTTP response code. Since it is recognized that developers do not always
+          have an easy ability to manipulate HTTP headers, and since headers do not
+          show up in the response body (e.g. when viewing results in a web browser),
+          the response data also contains the code and reason fields inside the
+          response where the response code and reason MUST be specified, unless the
+          error is such that the Service Provider is unable to return any response
+          data. If the Service Provider returns an HTTP status code other than 200,
+          Consumers MUST treat it as the definitive response code, even if the
+          response.code in the body differs (which it shouldn’t). However, if the
+          HTTP response code is 200, Consumers MUST defer to the response.code in the
+          body as the definitive response code.
+        </t>
+        <t>
+          Service Providers SHOULD conform the following response codes to indicate
+          the following situations. Service Providers MAY return additional codes to
+          indicate additional information, but are encouraged to use these codes and
+          augment them inside the reason rather than with a separate code.
+        </t>
+        <t>
+          <list style="hanging">
+            <t hangText="200:">
+              OK (response returned successfully)
+            </t>
+            <t hangText="400:">
+              Bad Request (request was malformed or illegal and cannot be completed)
+            </t>
+            <t hangText="401:">
+              Unauthorized (authentication headers / parameters were invalid or missing)
+            </t>
+            <t hangText="404:">
+              Not Found (the request points to an object that does not exist, e.g. to an
+              unknown contact uid; note that Service Providers MUST return a 200 with an
+              empty array of contacts if the request has filtering parameters that are
+              valid but have no matches)
+            </t>
+            <t hangText="500:">
+              Internal Server Error (un unexpected error occurred during processing)
+            </t>
+            <t hangText="503:">
+              Service Unavailable (service is temporarily unavailable; this may be
+              because the Consumer has exceeded their rate-limit of requests)
+            </t>
+          </list>
         </t>
       </section>
 
@@ -210,18 +378,37 @@
       <section title="contact Element">
         <t>
           <list style="hanging">
-            <t hangText="uid:">
+            <t hangText="id:">
               1 per <spanx style="verb">contact</spanx> element with type xs:string.
               Unique identifier for the Contact.
             </t>
-            <t hangText="created:">
+            <t hangText="published:">
               0 or 1 per <spanx style="verb">contact</spanx> element with type xs:dateTime.
             </t>
-            <t hangText="modified:">
+            <t hangText="updated:">
               0 or 1 per <spanx style="verb">contact</spanx> element with type xs:dateTime.
             </t>
             <t hangText="name:">
-              1 per <spanx style="verb">contact</spanx> element as defined in <xref target="name_element" />.
+              1 per <spanx style="verb">contact</spanx> element with type xs:string.
+              Full name or the common display name.
+            </t>
+            <t hangText="preferredUsername:">
+              0 or 1 per <spanx style="verb">contact</spanx> element with type xs:string.
+            </t>
+            <t hangText="familyName:">
+              0 or 1 per <spanx style="verb">contact</spanx> element with type xs:string.
+            </t>
+            <t hangText="givenName:">
+              0 or 1 per <spanx style="verb">contact</spanx> element with type xs:string.
+            </t>
+            <t hangText="middleName:">
+              0 or 1 per <spanx style="verb">contact</spanx> element with type xs:string.
+            </t>
+            <t hangText="honorificPrefix:">
+              0 or 1 per <spanx style="verb">contact</spanx> element with type xs:string.
+            </t>
+            <t hangText="honorificSuffix:">
+              0 or 1 per <spanx style="verb">contact</spanx> element with type xs:string.
             </t>
             <t hangText="bday:">
               0 or 1 per <spanx style="verb">contact</spanx> element with type xs:date. The
@@ -247,7 +434,7 @@
             </t>
             <t hangText="email:">
               0 or more per <spanx style="verb">contact</spanx> element with REQUIRED child elements:
-              
+
               <list style="hanging">
                 <t hangText="type:">Enumeration: work, home, other.</t>
                 <t hangText="value:">Canonical email address (put RFC here).</t>
@@ -272,7 +459,7 @@
                 <t hangText="primary:">Boolean.</t>
               </list>
             </t>
-            <t hangText="tel:">
+            <t hangText="phoneNumber:">
               0 or more per <spanx style="verb">contact</spanx> element with REQUIRED child elements:
 
               <list style="hanging">
@@ -290,100 +477,77 @@
                 <t hangText="primary:">Boolean.</t>
               </list>
             </t>
-            <t hangText="category:">
+            <t hangText="tag:">
               0 or more per <spanx style="verb">contact</spanx> element with type xs:string.
               Holds a single user-defined tag.
             </t>
             <t hangText="relationship:">
               0 or more per <spanx style="verb">contact</spanx> element with type xs:string. TBD.
             </t>
-            <t hangText="adr:">
-              0 or more per <spanx style="verb">contact</spanx> element as defined in <xref target="adr_element" />.
+            <t hangText="address:">
+              0 or more per <spanx style="verb">contact</spanx> element as defined in <xref target="address_element" />.
             </t>
-            <t hangText="org:">
-              0 or more per <spanx style="verb">contact</spanx> element as defined in <xref target="org_element" />.
+            <t hangText="job:">
+              0 or more per <spanx style="verb">contact</spanx> element as defined in <xref target="job_element" />.
             </t>
             <t hangText="account:">
               0 or more per <spanx style="verb">contact</spanx> element as defined in <xref target="account_element" />.
             </t>
-          </list>
-        </t>
-      </section>
-
-      <section title="name Element" anchor="name_element">
-        <t>
-          <list style="hanging">
-            <t hangText="fn:">
-              1 per <spanx style="verb">name</spanx> element with type xs:string.
-              Full name or the common display name.
-            </t>
-            <t hangText="familyName:">
-              0 or 1 per <spanx style="verb">name</spanx> element with type xs:string.
-            </t>
-            <t hangText="givenName:">
-              0 or 1 per <spanx style="verb">name</spanx> element with type xs:string.
-            </t>
-            <t hangText="middleName:">
-              0 or 1 per <spanx style="verb">name</spanx> element with type xs:string.
-            </t>
-            <t hangText="honorificPrefix:">
-              0 or 1 per <spanx style="verb">name</spanx> element with type xs:string.
-            </t>
-            <t hangText="honorificSuffix:">
-              0 or 1 per <spanx style="verb">name</spanx> element with type xs:string.
+            <t hangText="utcOffset:">
+              0 or 1 per <spanx style="verb">contact</spanx> element with type xs:dateTime.
             </t>
           </list>
         </t>
       </section>
 
-      <section title="adr Element" anchor="adr_element">
+      <section title="address Element" anchor="address_element">
         <t>
           <list style="hanging">
-            <t hangText="street:">
-              0 or more per <spanx style="verb">adr</spanx> element with type xs:string.
+            <t hangText="streetAddress:">
+              0 or more per <spanx style="verb">address</spanx> element with type xs:string.
             </t>
             <t hangText="locality:">
-              0 or 1 per <spanx style="verb">adr</spanx> element with type xs:string.
+              0 or 1 per <spanx style="verb">address</spanx> element with type xs:string.
             </t>
             <t hangText="region:">
-              0 or 1 per <spanx style="verb">adr</spanx> element with type xs:string.
+              0 or 1 per <spanx style="verb">address</spanx> element with type xs:string.
             </t>
             <t hangText="postalCode:">
-              0 or 1 per <spanx style="verb">adr</spanx> element with type xs:string.
+              0 or 1 per <spanx style="verb">address</spanx> element with type xs:string.
             </t>
             <t hangText="country:">
-              1 per <spanx style="verb">adr</spanx> element with type xs:string.
+              1 per <spanx style="verb">address</spanx> element with type xs:string.
             </t>
-            <t hangText="label:">
-              0 or more per <spanx style="verb">adr</spanx> element with type xs:string.
+            <t hangText="formatted:">
+              0 or more per <spanx style="verb">address</spanx> element with type xs:string.
             </t>
           </list>
         </t>
       </section>
 
-      <section title="org Element" anchor="org_element">
+      <section title="job Element" anchor="job_element">
         <t>
           <list style="hanging">
             <t hangText="name:">
-              1 per <spanx style="verb">org</spanx> element with type xs:string.
+              1 per <spanx style="verb">job</spanx> element with type xs:string.
             </t>
             <t hangText="department:">
-              0 or 1 per <spanx style="verb">org</spanx> element with type xs:string.
+              0 or 1 per <spanx style="verb">job</spanx> element with type xs:string.
             </t>
             <t hangText="title:">
-              0 or 1 per <spanx style="verb">org</spanx> element with type xs:string.
+              0 or 1 per <spanx style="verb">job</spanx> element with type xs:string.
             </t>
             <t hangText="startDate:">
-              0 or 1 per <spanx style="verb">org</spanx> element with type xs:date.
+              0 or 1 per <spanx style="verb">job</spanx> element with type xs:date.
             </t>
             <t hangText="endDate:">
-              0 or 1 per <spanx style="verb">org</spanx> element with type xs:date.
+              0 or 1 per <spanx style="verb">job</spanx> element with type xs:date.
             </t>
             <t hangText="location:">
-              0 or 1 per <spanx style="verb">org</spanx> element with type xs:string.
+              0 or 1 per <spanx style="verb">job</spanx> element with type xs:string.
             </t>
             <t hangText="description:">
-              0 or 1 per <spanx style="verb">org</spanx> element with type xs:string.
+              0 or 1 per <spanx style="verb">job</spanx> element with type xs:string.
             </t>
           </list>
         </t>
