@@ -26,12 +26,7 @@
 
     <abstract>
       <t>
-        The goal of Portable Contacts is to make it easier for developers to give their
-        users a secure way to access the address books and friends lists they have built
-        up all over the web. Specifically, it seeks to create a common access pattern and
-        contact schema that any site can provide, a well-specified authentication and access rules,
-        standard libraries that can work with any site, and absolutely minimal complexity,
-        with the lightest possible toolchain requirements for developers.
+        The goal of Portable Contacts is to make it easier for developers to give their users a secure way to access the address books and friends lists they have built up all over the web. Specifically, it seeks to create a common access pattern and contact schema that any site can provide, a well-specified authentication and access rules, standard libraries that can work with any site, and absolutely minimal complexity, with the lightest possible toolchain requirements for developers.
       </t>
       <t>
         By far the easiest way to start understanding this spec is to jump to the example in the Appendix. The format and meaning of the response should be readily apparent, and the majority of this document is merely an attempt to formalize the details of what should be relatively clear from this example.
@@ -43,10 +38,7 @@
 
     <section title="Notation and Conventions">
       <t>
-        The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
-        "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
-        document are to be interpreted as described in <xref target="RFC2119" />.
-        Domain name examples use <xref target="RFC2606" />.
+        The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in <xref target="RFC2119" />. Domain name examples use <xref target="RFC2606" />.
       </t>
     </section>
 
@@ -57,12 +49,10 @@
             A record describing information about a particular person or entity, consistenting of contact information (sometimes including name, e-mail addresses, phone numbers, and other information) and other information, as is typically found in address book and social networking applications.
           </t>
           <t hangText="Service Provider:">
-            A web application that provides Contacts information
-            via the Portable Contacts protocol.
+            A web application that provides Contacts information via the Portable Contacts protocol.
           </t>
           <t hangText="Consumer:">
-            A website or application that uses the Portable Contacts protocol
-            to request contacts managed by the Service Provider.
+            A website or application that uses the Portable Contacts protocol to request contacts managed by the Service Provider.
           </t>
           <t hangText="Base URL:">
             The root endpoint URL specified by the Service Provider during Discovery and used to make requests. Consumers MAY append additonal path information and query string parameters to this URL as part of the request.
@@ -107,8 +97,7 @@
 
     <section title="Discovery" anchor="discovery">
       <t>
-        Portable contacts API endpoint is discoverable from the domain root using XRDS-Simple (previously known as YADIS).
-        The API is identified by the Service Type http://portablecontacts.net/spec/1.0 and the corresponding URI is the Base URL for the API. The Base URL MUST NOT contain any query string, as additional path information and query string variables MAY be appended by Consumers as part of forming the request (as described in detail below).
+        Portable contacts API endpoint is discoverable from the domain root using XRDS-Simple (previously known as YADIS). The API is identified by the Service Type http://portablecontacts.net/spec/1.0 and the corresponding URI is the Base URL for the API. The Base URL MUST NOT contain any query string, as additional path information and query string variables MAY be appended by Consumers as part of forming the request (as described in detail below).
       </t>
       <t>
         An example XRDS-Simple document describing the availability and location of a Portable Contacts endpoint might look like this:
@@ -185,27 +174,20 @@ WWW-Authenticate: Basic realm="sample.site.org"
 
       <section title="Query Parameters" anchor="query-params">
         <t>
-          Portable Contacts defines a standard set of operations that can be used
-          to filter, sort, and paginate response results. The operations are specified
-          by adding query parameter to the Base URL, either in the query string or as
-          HTTP POST data.
+          Portable Contacts defines a standard set of operations that can be used to filter, sort, and paginate response results. The operations are specified by adding query parameter to the Base URL, either in the query string or as HTTP POST data.
         </t>
 
         <section title="Filtering">
           <t>
-            Filtering is used to limit the request results to Contacts that match a given
-            criterion. Content filtering is accomplished by combining three request parameters:
+            Filtering is used to limit the request results to Contacts that match a given criterion. Content filtering is accomplished by combining three request parameters:
 
             <list style="hanging">
               <t hangText="filterBy:">
                 Specifies the field name to filter by. If the field is not a direct child of the
-                <spanx style="verb">entry</spanx> element, the full path MUST be specified using
-                the '/' character as seperator. For example, to filter by gender the paramter value
-                is 'gender' and to filter by first name, the parameter value is 'name/givenName'. TODO(js): should we even allow filtering by non-top-level fields?
+                <spanx style="verb">entry</spanx> element, the full path MUST be specified using the '/' character as seperator. For example, to filter by gender the paramter value is 'gender' and to filter by first name, the parameter value is 'name/givenName'. TODO(js): should we even allow filtering by non-top-level fields?
               </t>
               <t hangText="filterOp:">
-                Defines the comparison method used to evaluate the field value with the value of
-                the filter criterion. Allowed values are:
+                Defines the comparison method used to evaluate the field value with the value of the filter criterion. Allowed values are:
                 <list style="symbols">
                   <t>
                     <spanx style="verb">equals</spanx>: the two values must be identical strings.
@@ -216,13 +198,11 @@ WWW-Authenticate: Basic realm="sample.site.org"
                   </t>
                   <t>
                     <spanx style="verb">startswith</spanx>: the entire <spanx style="verb">filterValue</spanx>
-                    must be a substring of the Contact field value, starting at the beginning of the field value. This
-                    criterion is satisfied if the two strings are equal.
+                    must be a substring of the Contact field value, starting at the beginning of the field value. This criterion is satisfied if the two strings are equal.
                   </t>
                   <t>
                     <spanx style="verb">present</spanx>: a Contact matches the criterion if the field specified by
-                    <spanx style="verb">filterBy</spanx> has a non-empty value, or if it contains a non empty node
-                    for complex fields.
+                    <spanx style="verb">filterBy</spanx> has a non-empty value, or if it contains a non empty node for complex fields.
                   </t>
                 </list>
               </t>
@@ -236,19 +216,13 @@ WWW-Authenticate: Basic realm="sample.site.org"
             
             <list style="hanging">
               <t hangText="updatedSince:">
-                Returns only contacts that have been modified on or after the given time, specified
-                as an xs:dateTime. The filter is based on the value of the <spanx style="verb">updated</spanx> field,
-                and can be used independently of other filters or combined. It enables a basic syndication pattern when
-                accessing the same data over time. The first API call returns all data, which can be stored locally.
-                Subsequent API calls can specify <spanx style="verb">updatedSince</spanx> with the time of the last
-                API call, so that only contacts that have been added or modified since the last API call will be returned.
+                Returns only contacts that have been modified on or after the given time, specified as an xs:dateTime. The filter is based on the value of the <spanx style="verb">updated</spanx> field, and can be used independently of other filters or combined. It enables a basic syndication pattern when accessing the same data over time. The first API call returns all data, which can be stored locally. Subsequent API calls can specify <spanx style="verb">updatedSince</spanx> with the time of the last API call, so that only contacts that have been added or modified since the last API call will be returned.
               </t>
             </list>
           </t>
           <t>
             Here are a few illustrative examples of filtering matches with <spanx style="verb">filterBy</spanx>,
-            <spanx style="verb">filterOp</spanx>, and <spanx style="verb">filterValue</spanx>.
-            In each case, assume the following two contacts would be returned if no filtering parameters were provided:
+            <spanx style="verb">filterOp</spanx>, and <spanx style="verb">filterValue</spanx>. In each case, assume the following two contacts would be returned if no filtering parameters were provided:
             
           <figure>
             <artwork>
@@ -270,12 +244,7 @@ WWW-Authenticate: Basic realm="sample.site.org"
             </artwork>
           </figure>
 
-            Given the parameters <spanx style="verb">filterBy=name&amp;filterOp=startswith&amp;filterValue=Chr</spanx>,
-            only the first contact (with id=1) would match and be returned. However, with
-            parameters <spanx style="verb">filterBy=name&amp;filterOp=present</spanx>, both contacts would be returned.
-            Given the parameters <spanx style="verb">filterBy=email&amp;filterOp=contains&amp;filterValue=plaxo.com</spanx>,
-            only the second contact (with id=2) would match, as would it be the only contact
-            to match given the parameters <spanx style="verb">filterBy=email&amp;filterOp=present</spanx>.
+            Given the parameters <spanx style="verb">filterBy=name&amp;filterOp=startswith&amp;filterValue=Chr</spanx>, only the first contact (with id=1) would match and be returned. However, with parameters <spanx style="verb">filterBy=name&amp;filterOp=present</spanx>, both contacts would be returned. Given the parameters <spanx style="verb">filterBy=email&amp;filterOp=contains&amp;filterValue=plaxo.com</spanx>, only the second contact (with id=2) would match, as would it be the only contact to match given the parameters <spanx style="verb">filterBy=email&amp;filterOp=present</spanx>.
           </t>
 
         </section>
@@ -286,19 +255,10 @@ WWW-Authenticate: Basic realm="sample.site.org"
             
             <list style="hanging">
               <t hangText="sortBy">
-                Specifies the field name whose value SHALL be used to order the returned Contacts.
-                The sort order is determine by the <spanx style="verb">sortOrder</spanx> parameter.
-                If <spanx style="verb">sortBy</spanx> is a Singular Field, contacts are sorted according
-                to that field’s value; if it’s a Plural Field, contacts are sorted by the Value
-                (or Major Value, if it’s a Plural Bundle Field) of the field marked with "primary": "true",
-                if any, or else the first value in the list, if any, or else they are sorted last if the
-                given contact has no data for the given field.
+                Specifies the field name whose value SHALL be used to order the returned Contacts. The sort order is determine by the <spanx style="verb">sortOrder</spanx> parameter. If <spanx style="verb">sortBy</spanx> is a Singular Field, contacts are sorted according to that field’s value; if it’s a Plural Field, contacts are sorted by the Value (or Major Value, if it’s a Plural Bundle Field) of the field marked with "primary": "true", if any, or else the first value in the list, if any, or else they are sorted last if the given contact has no data for the given field.
               </t>
               <t hangText="sortOrder">
-                The order in which the <spanx style="verb">sortBy</spanx> parameter is applied. Allowed values
-                are <spanx style="verb">ascending</spanx> and <spanx style="verb">descending</spanx>. If none specified
-                the sort order defaults to <spanx style="verb">ascending</spanx>. Sort order is expected to be
-                Unicode alphabetic sort order, with no specific locale implied.
+                The order in which the <spanx style="verb">sortBy</spanx> parameter is applied. Allowed values are <spanx style="verb">ascending</spanx> and <spanx style="verb">descending</spanx>. If none specified the sort order defaults to <spanx style="verb">ascending</spanx>. Sort order is expected to be Unicode alphabetic sort order, with no specific locale implied.
               </t>
             </list>
           </t>
@@ -310,66 +270,33 @@ WWW-Authenticate: Basic realm="sample.site.org"
             
             <list style="hanging">
               <t hangText="startIndex:">
-                Specifies the offset of the first result to be returned with respect to the list
-                of contacts that would be returned if no offset were provided. For instance, if
-                in a given request 10 contacts would normally be provided, if <spanx style="verb">startIndex</spanx>
-                is 7 and no <spanx style="verb">count</spanx> is specified, then only the last 3 contacts in that
-                list would be returned (contacts are zero-indexed). If <spanx style="verb">startIndex</spanx> is
-                greater than or equal to the total number of results that would be returned, no contacts are returned.
-                Value MUST be a non-negative integer and defaults to 0 if none specified.
+                Specifies the offset of the first result to be returned with respect to the list of contacts that would be returned if no offset were provided. For instance, if in a given request 10 contacts would normally be provided, if <spanx style="verb">startIndex</spanx>
+                is 7 and no <spanx style="verb">count</spanx> is specified, then only the last 3 contacts in that list would be returned (contacts are zero-indexed). If <spanx style="verb">startIndex</spanx> is greater than or equal to the total number of results that would be returned, no contacts are returned. Value MUST be a non-negative integer and defaults to 0 if none specified.
               </t>
               <t hangText="count:">
-                If non-zero, specifies the maximum number of contacts the service provider will return.
-                Value MUST be a non-negative integer and defaults to 0 if none is specified. Specifying
-                a <spanx style="verb">count</spanx> of 0 means that no limit should be placed
-                on the number of contacts returned. Otherwise, at most <spanx style="verb">count</spanx>
-                contacts will be returned, starting at <spanx style="verb">startIndex</spanx> and counting
-                up from there.
+                If non-zero, specifies the maximum number of contacts the service provider will return. Value MUST be a non-negative integer and defaults to 0 if none is specified. Specifying a <spanx style="verb">count</spanx> of 0 means that no limit should be placed on the number of contacts returned. Otherwise, at most <spanx style="verb">count</spanx>
+                contacts will be returned, starting at <spanx style="verb">startIndex</spanx> and counting up from there.
               </t>
             </list>
             
             For instance, on an initial query, specifying <spanx style="verb">startIndex=0&amp;count=10</spanx>
-            will return the first only the first 10 results. The total number of possible results is indicated
-            by the totalCount field of results, so the client knows how many "pages" of results exist.
-            A subsequent query of <spanx style="verb">startIndex=10&amp;count=10</spanx> will return the next
-            10 results, and so on.
+            will return the first only the first 10 results. The total number of possible results is indicated by the totalCount field of results, so the client knows how many "pages" of results exist. A subsequent query of <spanx style="verb">startIndex=10&amp;count=10</spanx> will return the next 10 results, and so on.
           </t>
         </section>
 
         <section title="Presentation">
           <t>
-            Presentation controls the format, makeup, and delivery mechanism for delivering the requested
-            result set:
+            Presentation controls the format, makeup, and delivery mechanism for delivering the requested result set:
             
             <list style="hanging">
-              <t hangText="format:">
-                Specifies the format in which the response data is returned. Service Providers MUST support the values <spanx style="verb">json</spanx> for JSON (http://json.org) and <spanx style="verb">xml</spanx> for XML (http://www.w3.org/XML/) and MAY support additional formats if desired. The format defaults to json if no format is specified.
-                The data structure returned is equivalent in both formats,
-                with the only difference is in the encoding of the data. Singlular Fields are encoded as string
-                key/value pairs in JSON and tags with text content in XML, e.g. "field": "value" and
-                &lt;field&gt;value&lt;/field&gt; respectively. Plural Fields and Plural Bundles are encoded as
-                arrays in JSON and repeated tags in XML, e.g. "field": [ "value1", "value2" ] and
-                &lt;field&gt;value1&lt;/field&gt;&lt;field&lt;value2&lt;/field&gt; respectively.
-                Nodes with multiple sub-nodes are represented as objects in JSON and tags with
-                sub-tags in XML, e.g. "field": { "subfield1": "value1", "subfield2": "value2" }
-                and &lt;field&gt;&lt;subfield1&gt;&lt;value1&gt;&lt;/subfield1&gt;&lt;subfield2&gt;value2&lt;/subfield2&gt;&lt;/field&gt;
-                respectively.
-              </t>
               <t hangText="fields:">
-                If non-empty, each contact returned SHALL contain only the fields explicitly requested.
-                Service Provider MAY return a subset of the requested fields if they are not supported.
-                This field is used for efficiency when the client only wishes to access a subset of the
-                fields normally returned in results. Value is a comma seperated list of top level field names (e.g. <spanx style="verb">id,name,email,photo</spanx>)
-                and defaults to an emply list which means all available fields should be returned.
+                If non-empty, each contact returned SHALL contain only the fields explicitly requested. Service Provider MAY return a subset of the requested fields if they are not supported. This field is used for efficiency when the client only wishes to access a subset of the fields normally returned in results. Value is a comma seperated list of top level field names (e.g. <spanx style="verb">id,name,email,photo</spanx>) and defaults to an emply list which means all available fields should be returned.
+              </t>
+              <t hangText="format:">
+                Specifies the format in which the response data is returned. Service Providers MUST support the values <spanx style="verb">json</spanx> for JSON (http://json.org) and <spanx style="verb">xml</spanx> for XML (http://www.w3.org/XML/) and MAY support additional formats if desired. The format defaults to json if no format is specified. The data structure returned is equivalent in both formats, with the only difference is in the encoding of the data. Singlular Fields are encoded as string key/value pairs in JSON and tags with text content in XML, e.g. "field": "value" and &lt;field&gt;value&lt;/field&gt; respectively. Plural Fields and Plural Bundles are encoded as arrays in JSON and repeated tags in XML, e.g. "field": [ "value1", "value2" ] and &lt;field&gt;value1&lt;/field&gt;&lt;field&lt;value2&lt;/field&gt; respectively. Nodes with multiple sub-nodes are represented as objects in JSON and tags with sub-tags in XML, e.g. "field": { "subfield1": "value1", "subfield2": "value2" } and &lt;field&gt;&lt;subfield1&gt;&lt;value1&gt;&lt;/subfield1&gt;&lt;subfield2&gt;value2&lt;/subfield2&gt;&lt;/field&gt; respectively.
               </t>
               <t hangText="callback:">
-                Only applies if format=json, if so, the output is wrapped in a call to the given callback
-                function, for use with AJAX JSON-P callback invocation. For instance, if the result would
-                normally be { "field": "value" } and callback=myFunc, the output would be myFunc({"field": "value"});
-                See http://developer.yahoo.com/common/json.html#callbackparam for more information. Value
-                is a JavaScript callback function name. Callback function names may only use upper and
-                lowercase alphabetic characters (A-Z, a-z), numbers (0-9), the period (.), the underscore (_),
-                and brackets ([ and ]). Brackets must be URL-encoded.
+                Only applies if format=json, if so, the output is wrapped in a call to the given callback function, for use with AJAX JSON-P callback invocation. For instance, if the result would normally be { "field": "value" } and callback=myFunc, the output would be myFunc({"field": "value"}); See http://developer.yahoo.com/common/json.html#callbackparam for more information. Value is a JavaScript callback function name. Callback function names may only use upper and lowercase alphabetic characters (A-Z, a-z), numbers (0-9), the period (.), the underscore (_), and brackets ([ and ]). Brackets must be URL-encoded.
               </t>
             </list>
           </t>
@@ -416,34 +343,13 @@ WWW-Authenticate: Basic realm="sample.site.org"
 
       <section title="Error Codes" anchor="error-codes">
         <t>
-          The Service Provider MUST return a response code with every response.
-          Response codes are numeric and based on existing HTTP response codes,
-          as defined below. In addition to the response code, Service Providers
-          SHOULD also provide a human-readable reason that explains the reason
-          for the response code. This message SHOULD be intelligible to
-          developers, but MAY be unsuitable for display to end-users.
-          Clients SHOULD provide their own appropriate error message to users
-          when encountering an error response.
+          The Service Provider MUST return a response code with every response. Response codes are numeric and based on existing HTTP response codes, as defined below. In addition to the response code, Service Providers SHOULD also provide a human-readable reason that explains the reason for the response code. This message SHOULD be intelligible to developers, but MAY be unsuitable for display to end-users. Clients SHOULD provide their own appropriate error message to users when encountering an error response.
         </t>
         <t>
-          Service Providers SHOULD send their response code and message via the
-          HTTP response code. Since it is recognized that developers do not always
-          have an easy ability to manipulate HTTP headers, and since headers do not
-          show up in the response body (e.g. when viewing results in a web browser),
-          the response data also contains the code and reason fields inside the
-          response where the response code and reason MUST be specified, unless the
-          error is such that the Service Provider is unable to return any response
-          data. If the Service Provider returns an HTTP status code other than 200,
-          Consumers MUST treat it as the definitive response code, even if the
-          response.code in the body differs (which it shouldn’t). However, if the
-          HTTP response code is 200, Consumers MUST defer to the response.code in the
-          body as the definitive response code.
+          Service Providers SHOULD send their response code and message via the HTTP response code. Since it is recognized that developers do not always have an easy ability to manipulate HTTP headers, and since headers do not show up in the response body (e.g. when viewing results in a web browser), the response data also contains the code and reason fields inside the response where the response code and reason MUST be specified, unless the error is such that the Service Provider is unable to return any response data. If the Service Provider returns an HTTP status code other than 200, Consumers MUST treat it as the definitive response code, even if the response.code in the body differs (which it shouldn’t). However, if the HTTP response code is 200, Consumers MUST defer to the response.code in the body as the definitive response code.
         </t>
         <t>
-          Service Providers SHOULD conform the following response codes to indicate
-          the following situations. Service Providers MAY return additional codes to
-          indicate additional information, but are encouraged to use these codes and
-          augment them inside the reason rather than with a separate code.
+          Service Providers SHOULD conform the following response codes to indicate the following situations. Service Providers MAY return additional codes to indicate additional information, but are encouraged to use these codes and augment them inside the reason rather than with a separate code.
         </t>
         <t>
           <list style="hanging">
@@ -457,17 +363,13 @@ WWW-Authenticate: Basic realm="sample.site.org"
               Unauthorized (authentication headers / parameters were invalid or missing)
             </t>
             <t hangText="404:">
-              Not Found (the request points to an object that does not exist, e.g. to an
-              unknown contact uid; note that Service Providers MUST return a 200 with an
-              empty array of contacts if the request has filtering parameters that are
-              valid but have no matches)
+              Not Found (the request points to an object that does not exist, e.g. to an unknown contact uid; note that Service Providers MUST return a 200 with an empty array of contacts if the request has filtering parameters that are valid but have no matches)
             </t>
             <t hangText="500:">
               Internal Server Error (un unexpected error occurred during processing)
             </t>
             <t hangText="503:">
-              Service Unavailable (service is temporarily unavailable; this may be
-              because the Consumer has exceeded their rate-limit of requests)
+              Service Unavailable (service is temporarily unavailable; this may be because the Consumer has exceeded their rate-limit of requests)
             </t>
           </list>
         </t>
@@ -477,33 +379,32 @@ WWW-Authenticate: Basic realm="sample.site.org"
 
     <section title="Contact Schema">
       <t>
-        The Contact schema defines the containers and attributes used to deliver
-        an individual Contact or a list of Contacts as requested by the Consumer.
+        The Contact schema defines the containers and attributes used to deliver an individual Contact or a list of Contacts as requested by the Consumer. The traditional contact info fields were taken directly from the vCard spec where possible, though instances of vCard's archaic spellings were modernized (e.g. <spanx style="verb">address</spanx> instead of <spanx style="verb">adr</spanx>). Even with the spelling updates, the field mappings remain equivalent, which means it should be easy to convert Portable Contacts data to and from vCard.
+      </t>
+      <t>
+        Each contact returned MUST include the <spanx style="verb">id</spanx> and <spanx style="verb">name</spanx> fields with non-empty values, but all other fields are optional, and it is recognized that not all Service Providers will be able to provide data for all the supported fields. The field list is below is broad so that, for Service Providers that do support any of these fields, there is a standard field name available.
       </t>
 
       <section title="Structure">
         <t>
-          Contact information is formatted using labeled attributes with either
-          structured or unstructured string data. Each attributes has a defined
-          occurrence count and use one of the following types:
+          Each field is defined as either a Signular Field, in which case there can be at most one instance of that field per contact, or as a Plural Field, which case any number of instances of that field may be present per contact. 
+        </t>
+        <t>
+          Contact information is formatted using labeled attributes with either structured or unstructured string data. Each attributes has a defined occurrence count and use one of the following types:
 
           <list style="hanging">
             <t hangText="Simple:">
-              A single string attribute which MAY specify a REQUIRED data format or allow
-              any string.
+              A single string attribute which MAY specify a REQUIRED data format or allow any string.
             </t>
             <t hangText="Enumeration:">
-              A single string attribute with a defined set of allowed values. Service Providers
-              MAY extend the schema to include additional enumeration values, but SHOULD prefix
-              them with a unique namespace as defined in <xref target="namespaces" />.
+              A single string attribute with a defined set of allowed values. Service Providers MAY extend the schema to include additional enumeration values, but SHOULD prefix them with a unique namespace as defined in <xref target="namespaces" />.
             </t>
             <t hangText="Boolean">
               An attribute with one of two allowed values: <spanx style="verb">true</spanx> and
               <spanx style="verb">false</spanx>. Values are case-sensitive.
             </t>
             <t hangText="Complex:">
-              A multi-value attribute containing any combination of other attributes. Complex
-              attributes are defined by listing the child attributes and their types.
+              A multi-value attribute containing any combination of other attributes. Complex attributes are defined by listing the child attributes and their types. For most Complex Fields, the <spanx style="verb">value</spanx> sub-field contains the Major Value of that field (i.e. the primary piece of contact information described by that field), and the other fields provide additional meta-data.
             </t>
           </list>
         </t>
@@ -516,124 +417,113 @@ WWW-Authenticate: Basic realm="sample.site.org"
 
       <section title="contact Element">
         <t>
+          Unless otherwise specified, all fields are optional and of type xs:string. Also, unless specified, all field values MUST NOT contain any newline characters (\r or \n).
+        </t>
+        <t>Singular Fields:</t>
+        <t>
           <list style="hanging">
             <t hangText="id:">
-              1 per <spanx style="verb">contact</spanx> element with type xs:string.
-              Unique identifier for the Contact.
-            </t>
-            <t hangText="published:">
-              0 or 1 per <spanx style="verb">contact</spanx> element with type xs:dateTime.
-            </t>
-            <t hangText="updated:">
-              0 or 1 per <spanx style="verb">contact</spanx> element with type xs:dateTime.
+              Unique identifier for the Contact. Each Contact returned MUST include a non-empty id value. This identifier MUST be unqiue across this user's entire set of Contacts, but MAY not be unique across multiple users' data. It MUST be a stable ID that does not change when the same contact is returned in subsequent requests. For instance, an e-mail address is not a good id, because the same person may get a different e-mail address in the future. Usually, in internal databsase ID will be the right choice here, e.g. <spanx style="verb">"12345"</spanx>.
             </t>
             <t hangText="name:">
-              1 per <spanx style="verb">contact</spanx> element with type xs:string.
-              Full name or the common display name.
-            </t>
-            <t hangText="preferredUsername:">
-              0 or 1 per <spanx style="verb">contact</spanx> element with type xs:string.
+
+              The name of this Contact, suitable for display to end-users. Each Contact returned MUST include a non-empty name value. The name SHOULD be the full-name of the Contact being described if known (e.g. <spanx style="verb">Joseph Smarr</spanx> or <spanx style="verb">Mr. Joseph Robert Smarr, Esq.</spanx>), but MAY be a username or handle, if that is all that is available (e.g. <spanx style="verb">jsmarr</spanx>). The value provided SHOULD be the primary textual label by which this Contact is normally displayed by the Service Provider when presenting it to end-users.
+
             </t>
             <t hangText="familyName:">
-              0 or 1 per <spanx style="verb">contact</spanx> element with type xs:string.
+              The family name of this Contact, or "Last Name" in most Western languages (e.g. <spanx style="verb">Smarr</spanx> given the full name <spanx style="verb">Mr. Joseph Robert Smarr, Esq.</spanx>).
             </t>
             <t hangText="givenName:">
-              0 or 1 per <spanx style="verb">contact</spanx> element with type xs:string.
+              The given name of this Contact, or "First Name" in most Western languages (e.g. <spanx style="verb">Joseph</spanx> given the full name <spanx style="verb">Mr. Joseph Robert Smarr, Esq.</spanx>).
             </t>
             <t hangText="middleName:">
-              0 or 1 per <spanx style="verb">contact</spanx> element with type xs:string.
+              The middle name(s) of this Contact (e.g. <spanx style="verb">Robert</spanx> given the full name <spanx style="verb">Mr. Joseph Robert Smarr, Esq.</spanx>).
             </t>
             <t hangText="honorificPrefix:">
-              0 or 1 per <spanx style="verb">contact</spanx> element with type xs:string.
+              The honorific prefix(es) of this Contact, or "Title" in most Western languages (e.g. <spanx style="verb">Mr.</spanx> given the full name <spanx style="verb">Mr. Joseph Robert Smarr, Esq.</spanx>).
             </t>
             <t hangText="honorificSuffix:">
-              0 or 1 per <spanx style="verb">contact</spanx> element with type xs:string.
+              The honorifix suffix(es) of this Contact, or "Suffix" in most Western languages (e.g. <spanx style="verb">Esq.</spanx> given the full name <spanx style="verb">Mr. Joseph Robert Smarr, Esq.</spanx>).
+            </t>
+            <t hangText="nickname:">
+              The casual way to address this Contact in real life, e.g. "Bob" or "Bobby" instead of "Robert". This field SHOULD NOT be used to represent a user's username (e.g. <spanx style="verb">jsmarr</spanx> or <spanx style="verb">daveman692</spanx>); the latter should be represented by the <spanx style="verb">preferredUsername</spanx> field.
+            </t>
+            <t hangText="published:">
+              The date this Contact was first added to the user's address book or friends list (i.e. the creation date of this entry). The value MUST be a valid xd:dateTime (e.g. <spanx style="verb">2008-01-23T04:56:22Z</spanx>).
+            </t>
+            <t hangText="updated:">
+              The most recent date the details of this Contact were updated (i.e. the modified date of this entry). The value MUST be a valid xd:dateTime (e.g. <spanx style="verb">2008-01-23T04:56:22Z</spanx>). If this Contact has never been modified since its initial creation, the value MUST be the same as the value of <spanx style="verb">published</spanx>. Note the <spanx style="verb">updatedSince</spanx> Query Parameter described in <xref target="query-params" /> can be used to select only contacts whose <spanx style="verb">updated</spanx> value is equal to or more recent than a given xs:dateTime. This enables Consumers to repeatedly access a user's data and only request newly added or updated contacts since the last access time.
             </t>
             <t hangText="birthday:">
-              0 or 1 per <spanx style="verb">contact</spanx> element with type xs:date. The
-              year value MAY be set to <spanx style="verb">0000</spanx> when the age of the
-              Contact is private or the year is not available.
+              The birthday of this contact. The value MUST be a valid xs:date (e.g. <spanx style="verb">1975-02-14</spanx>. The year value MAY be set to <spanx style="verb">0000</spanx> when the age of the Contact is private or the year is not available.
             </t>
             <t hangText="anniversary:">
-              0 or 1 per <spanx style="verb">contact</spanx> element with type xs:date. The
-              year value MAY be set to <spanx style="verb">0000</spanx> when the year is not available.
+              The wedding anniversary of this contact. The value MUST be a valid xs:date (e.g. <spanx style="verb">1975-02-14</spanx>. The year value MAY be set to <spanx style="verb">0000</spanx> when the year is not available.
             </t>
             <t hangText="gender:">
-              0 or 1 per <spanx style="verb">contact</spanx> element with type enumeration.
-              Allowed values: <spanx style="verb">male</spanx>, <spanx style="verb">female</spanx>,
-              and <spanx style="verb">undisclosed</spanx>.
+              The gender of this contact. Service Providers SHOULD return one of the following Canonical Values, if appropriate: <spanx style="verb">male</spanx>, <spanx style="verb">female</spanx>, and <spanx style="verb">undisclosed</spanx>, and MAY return a different value if it is not covered by one of these Canonical Values.
             </t>
             <t hangText="note:">
-              0 or 1 per <spanx style="verb">contact</spanx> element with type xs:string. Text notes and comments with
-              multiple lines seperated by a line feed character (ASCII 13).
+              Notes about this contact, with an unspecified meaning or usage (normally contact notes by the user about this contact). This field MAY contain newlines.
             </t>
-            <t hangText="connected:">
-              0 or 1 <spanx style="verb">contact</spanx> element with type xs:boolean. Indicates if a two-way relationship
-              is established with the Contact.
-            </t>
-            <t hangText="email:">
-              0 or more per <spanx style="verb">contact</spanx> element with REQUIRED child elements:
-
-              <list style="hanging">
-                <t hangText="type:">Enumeration: work, home, other.</t>
-                <t hangText="value:">Canonical email address (put RFC here).</t>
-                <t hangText="primary:">Boolean.</t>
-              </list>
-            </t>
-            <t hangText="url:">
-              0 or more per <spanx style="verb">contact</spanx> element with REQUIRED child elements:
-
-              <list style="hanging">
-                <t hangText="type:">Enumeration: work, home, other, blog, profile.</t>
-                <t hangText="value:">Absolute URI with any scheme.</t>
-                <t hangText="primary:">Boolean.</t>
-              </list>
-            </t>
-            <t hangText="im:">
-              0 or more per <spanx style="verb">contact</spanx> element with REQUIRED child elements:
-
-              <list style="hanging">
-                <t hangText="type:">Enumeration: aim, gtalk, icq, xmpp, msn, skype, qq, yahoo</t>
-                <t hangText="value:">Screen name</t>
-                <t hangText="primary:">Boolean.</t>
-              </list>
-            </t>
-            <t hangText="phoneNumber:">
-              0 or more per <spanx style="verb">contact</spanx> element with REQUIRED child elements:
-
-              <list style="hanging">
-                <t hangText="type:">Enumeration: work, home, other, mobile, fax, pager.</t>
-                <t hangText="value:">String.</t>
-                <t hangText="primary:">Boolean.</t>
-              </list>
-            </t>
-            <t hangText="photo:">
-              0 or more per <spanx style="verb">contact</spanx> element with REQUIRED child elements:
-
-              <list style="hanging">
-                <t hangText="type:">Enumeration: work, home, other.</t>
-                <t hangText="value:">Absolute URI of the image itself (not containing pages).</t>
-                <t hangText="primary:">Boolean.</t>
-              </list>
-            </t>
-            <t hangText="tag:">
-              0 or more per <spanx style="verb">contact</spanx> element with type xs:string.
-              Holds a single user-defined tag.
-            </t>
-            <t hangText="relationship:">
-              0 or more per <spanx style="verb">contact</spanx> element with type xs:string. TBD.
-            </t>
-            <t hangText="address:">
-              0 or more per <spanx style="verb">contact</spanx> element as defined in <xref target="address_element" />.
-            </t>
-            <t hangText="job:">
-              0 or more per <spanx style="verb">contact</spanx> element as defined in <xref target="job_element" />.
-            </t>
-            <t hangText="account:">
-              0 or more per <spanx style="verb">contact</spanx> element as defined in <xref target="account_element" />.
+            <t hangText="preferredUsername:">
+              The preferred username of this contact on sites that ask for a username (e.g. <spanx style="verb">jsmarr</spanx>). This field may be more useful for describing the owner (i.e. the value when /@me/@self is requested) than the user's contacts, e.g. Consumers MAY wish to use this value to pre-populate a username for this user when signing up for a new service.
             </t>
             <t hangText="utcOffset:">
-              0 or 1 per <spanx style="verb">contact</spanx> element with type xs:dateTime.
+              The offset from UTC of this Contact's current eime zone, as of the the time this response was returned. The value MUST conform to the offset portion of xs:dateTime, e.g. <spanx style="verb">-08:00</spanx>. Note that this value MAY change over time due to daylight saving time, and is thus meant to signify only the current value of the user's timezone offset. 
+            </t>            
+            <t hangText="connected:">
+              Boolean value indicating whether the user and this Contact have established a bi-directionally asserted connection of some kind on the Service Provider's service. The value MUST be either <spanx style="verb">true</spanx> or <spanx style="verb">false</spanx>. The value MUST be true if and only if there is at least one value for the <spanx style="verb">relationship</spanx> field, described below, and is thus intended as a summary value indicating that some type of bi-directional relationship exists, for Consumers that aren't interested in the specific nature of that relationship. For traditional address books, in which a user stores information about other contacts without their explicit acknowledgment, or for services in which users choose to "follow" other users without requiring mutual consent, this value will always be false.
+            </t>
+          </list>
+        </t>
+        <t>Plural Fields:</t>
+        <t>
+          Unless specified otherwise, all Plural Fields have the same three standard sub-fields:
+          <list style="hanging">
+            <t hangText="value:">
+              The primary value of this field, e.g. the actual e-mail address, phone number, or URL. When specifing a <spanx style="verb">sortBy</spanx> field in the Query Parameters for a Plural Field, the default meaning is to sort based on this <spanx style="verb">value</spanx> sub-field. Each non-empty Plural Field value MUST contain at least the value sub-field, but all other sub-fields are optional.
+            </t>
+            <t hangText="type:">
+              The type of field for this instance, usually used to label the preferred function of the given contact information. Unless otherwise specified, this string value specifies Canonical Values of <spanx style="verb">work</spanx>, <spanx style="verb">home</spanx>, and <spanx style="verb">other</spanx>. As with all such Enumeration Fields, Service Providers SHOULD conform to one of the Canonical Values if appropriate, but MAY use an alternate value if they choose.
+            </t>
+            <t hangText="primary:">
+              A Boolean value indicating whether this instance of the Plural Field is the primary or preferred value of for this field, e.g. the preferred mailing address or primary e-mail address. Service Providers MUST NOT mark more than one instance of the same Plural Field as primary="true", and MAY choose not to mark any fields as primary, if this information is not available. For efficiency, Service Providers SHOULD NOT mark all non-primary fields with primary="false".
+            </t>
+          </list>
+          When returning Plural Fields, Service Providers SHOULD canonicalize the value returned, if appropriate (e.g. for e-mail addresses and URLs). Providers MAY return the same value more than once with different types (e.g. the same e-mail address may used for work and home), but SHOULD NOT return the same (type, value) combination more than once per Plural Field, as this complicates processing by the Consumer.
+          
+          <list style="hanging">
+            <t hangText="email:">
+              E-mail address for this Contact. The value SHOULD be canonicalized by the Service Provider, e.g. <spanx style="verb">joseph@plaxo.com</spanx> instead of <spanx style="verb">joseph@PLAXO.COM</spanx>.
+            </t>
+            <t hangText="url:">
+              URL of a web page relating to this Contact. The value SHOULD be canonicalized by the Service Provider, e.g. <spanx style="verb">http://josephsmarr.com/about/</spanx> instead of <spanx style="verb">JOSEPHSMARR.COM/about/</spanx>. In addition to the standard Canonical Values for type, this field also defines the additional Canonical Values <spanx style="verb">blog</spanx> and <spanx style="verb">profile</spanx>.
+            </t>
+            <t hangText="phoneNumber:">
+              Phone number for this Contact. No canonical value is assumed here. In addition to the standard Canonical Values for this type, this field also defines the additional Canonical Values <spanx style="verb">mobile</spanx>, <spanx style="verb">fax</spanx>, and <spanx style="verb">pager</spanx>.
+            </t>
+            <t hangText="im:">
+              Instant messaging address for this Contact. No official canonicalization rules exist for all instant messsging addresses, but Service Providers SHOULD remove all whitespace and convert the address to lowercase, if this is appropriate for the service this IM address is used for. Instead of the standard Canonical Values for type, this field defines the following Canonical Values to represent currently popular IM services: <spanx style="verb">aim</spanx>, <spanx style="verb">gtalk</spanx>, <spanx style="verb">icq</spanx>, <spanx style="verb">xmpp</spanx>, <spanx style="verb">msn</spanx>, <spanx style="verb">skype</spanx>, <spanx style="verb">qq</spanx>, and <spanx style="verb">yahoo</spanx>.
+            </t>
+
+            <t hangText="photo:">
+              URL of a photo of this contact. The value SHOULD be a canonicalized URL, and MUST point to an actual image file (e.g. a GIF, JPEG, or PNG image file) rather than to a web page containing an image. Service Providers MAY return the same image at different sizes, though it is recognized that no standard for describing images of various sizes currently exists. Note that this field SHOULD NOT be used to send down arbitrary photos taken by this user, but specifically profile photos of the contact suitable for display when describing the contact.
+            </t>
+            <t hangText="tag:">
+              A user-defined category label for this contact, e.g. "favorite" or "web20".
+            </t>
+            <t hangText="relationship:">
+              A bi-directionally asserted relationship type that was established between the user and this contact by the Service Provider. The value SHOULD conform to one of the XFN relationship values (e.g. kin, friend, contact, etc.) if appropriate, but MAY be an alternative value if needed. Note this field is a parallel set of category labels to the <spanx style="verb">tag</spanx> field, but relationships MUST have been bi-directionally confirmed, whereas tags are asserted by the user without acknoledgment by this Contact.
+            </t>
+            <t hangText="address:">
+              A physical mailing address for this Contact, as described in <xref target="address_element" />.
+            </t>
+            <t hangText="job:">
+              A current or past organizational affiliation of this Contact, as described in <xref target="job_element" />.
+            </t>
+            <t hangText="account:">
+              An online account held by this Contact, as described in <xref target="account_element" />.
             </t>
           </list>
         </t>
@@ -641,24 +531,25 @@ WWW-Authenticate: Basic realm="sample.site.org"
 
       <section title="address Element" anchor="address_element">
         <t>
+          The components of a physical mailing address. Service Providers MAY return just the full address as a single string in the <spanx style="verb">formatted</spanx> sub-field, or they MAY return just the individual component fields using the other sub-fields, or the MAY return both. If both variants are returned, they SHOULD be describing the same address, with the formatted address indicating how the component fields should be combined.
           <list style="hanging">
+            <t hangText="formatted:">
+              The full mailing address, formatted for display or use with a mailing label. This field MAY contain newlines.
+            </t>
             <t hangText="streetAddress:">
-              0 or more per <spanx style="verb">address</spanx> element with type xs:string.
+              The full street address component, which may include house number, street name, PO BOX, and multi-line extended street address information. This field MAY contain newlines.
             </t>
             <t hangText="locality:">
-              0 or 1 per <spanx style="verb">address</spanx> element with type xs:string.
+              The city or locality component.
             </t>
             <t hangText="region:">
-              0 or 1 per <spanx style="verb">address</spanx> element with type xs:string.
+              The state or region component.
             </t>
             <t hangText="postalCode:">
-              0 or 1 per <spanx style="verb">address</spanx> element with type xs:string.
+              The zipcode or postal code component.
             </t>
             <t hangText="country:">
-              1 per <spanx style="verb">address</spanx> element with type xs:string.
-            </t>
-            <t hangText="formatted:">
-              0 or more per <spanx style="verb">address</spanx> element with type xs:string.
+              The country name component.
             </t>
           </list>
         </t>
@@ -666,27 +557,28 @@ WWW-Authenticate: Basic realm="sample.site.org"
 
       <section title="job Element" anchor="job_element">
         <t>
+          Describes a current or past organizational affiliation of this contact. Service Providers that support only a single Company Name and Job Title field should represent them with a single job element with name and title properties, respectively. 
           <list style="hanging">
             <t hangText="name:">
-              1 per <spanx style="verb">job</spanx> element with type xs:string.
+              The name of the organization (e.g. company, school, or other organization). This field MUST have a non-empty value for each job returned.
             </t>
             <t hangText="department:">
-              0 or 1 per <spanx style="verb">job</spanx> element with type xs:string.
+              The department within this organization.
             </t>
             <t hangText="title:">
-              0 or 1 per <spanx style="verb">job</spanx> element with type xs:string.
+              The job title or organizational role within this organization.
             </t>
             <t hangText="startDate:">
-              0 or 1 per <spanx style="verb">job</spanx> element with type xs:date.
+              The date this Contact joined this organization. This value SHOULD be a valid xs:date if possible, but MAY be an unformatted string, since it is recognized that this field is often presented as free-text.
             </t>
             <t hangText="endDate:">
-              0 or 1 per <spanx style="verb">job</spanx> element with type xs:date.
+              The date this Contact left this organization or the role specified by title within this organization. This value SHOULD be a valid xs:date if possible, but MAY be an unformatted string, since it is recognized that this field is often presented as free-text.
             </t>
             <t hangText="location:">
-              0 or 1 per <spanx style="verb">job</spanx> element with type xs:string.
+              The physical location of this organization. This may be a complete address, or an abbreviated location like "San Francisco".
             </t>
             <t hangText="description:">
-              0 or 1 per <spanx style="verb">job</spanx> element with type xs:string.
+              A textual description of the role this Contact played in this organization. This field MAY contain newlines.
             </t>
           </list>
         </t>
@@ -694,18 +586,18 @@ WWW-Authenticate: Basic realm="sample.site.org"
 
       <section title="account Element" anchor="account_element">
         <t>
+          Describes an account held by this Contact, which MAY be on the Service Provider's service, or MAY be on a different service. Consumers SHOULD NOT assume that this account has been verified by the Service Provider to actually belong to this Contact. For each account, the <spanx style="verb">domain</spanx> is the top-most authoritative domain for this account, e.g. <spanx style="verb">yahoo.com</spanx> or <spanx style="verb">reader.google.com</spanx>, and MUST be non-empty. Each account must also contain a non-empty value for either <spanx style="verb">userName</spanx> or<spanx style="verb">userId</spanx>, and MAY contain both, in which case the two values MUST be for the same account. These accounts can be used to determine if a user on one service is also known to be the same person on a different service, to facilitate connecting to people the user already knows on different services. If Consumers want to turn these accounts into profile URLs, they can use an open-source library like google-sgnodemapper (TODO: add xref).
           <list style="hanging">
             <t hangText="domain:">
-              1 per <spanx style="verb">account</spanx> element with type xs:string.
+              The top-most authoritative domain for this account, e.g. "twitter.com".
             </t>
             <t hangText="userName:">
-              0 or 1 per <spanx style="verb">account</spanx> element with type xs:string.
+              An alphanumeric user name, usually chosen by the user, e.g. "jsmarr".
             </t>
             <t hangText="userId:">
-              0 or 1 per <spanx style="verb">account</spanx> element with type xs:string.
+              A user ID number, usually chosen automatically, and usually numeric but sometimes alphanumeric, e.g. "12345" or "1Z425A".
             </t>
           </list>
-          Note that at least one of <spanx style="verb">userId</spanx> or <spanx style="verb">userName</spanx> MUST be present for each <spanx style="verb">account</spanx>.
         </t>
       </section>
 
