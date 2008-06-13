@@ -33,6 +33,9 @@
         standard libraries that can work with any site, and absolutely minimal complexity,
         with the lightest possible toolchain requirements for developers.
       </t>
+      <t>
+        By far the easiest way to start understanding this spec is to jump to the example in the Appendix. The format and meaning of the response should be readily apparent, and the majority of this document is merely an attempt to formalize the details of what should be relatively clear from this example.
+      </t>
     </abstract>
 
   </front>
@@ -196,9 +199,9 @@ WWW-Authenticate: Basic realm="sample.site.org"
             <list style="hanging">
               <t hangText="filterBy:">
                 Specifies the field name to filter by. If the field is not a direct child of the
-                <spanx style="verb">contact</spanx> element, the full path MUST be specified using
+                <spanx style="verb">entry</spanx> element, the full path MUST be specified using
                 the '/' character as seperator. For example, to filter by gender the paramter value
-                is 'gender' and to filter by first name, the parameter value is 'name/givenName'.
+                is 'gender' and to filter by first name, the parameter value is 'name/givenName'. TODO(js): should we even allow filtering by non-top-level fields?
               </t>
               <t hangText="filterOp:">
                 Defines the comparison method used to evaluate the field value with the value of
@@ -232,12 +235,12 @@ WWW-Authenticate: Basic realm="sample.site.org"
             In addition, requests can filter content based on their update timestamp:
             
             <list style="hanging">
-              <t hangText="modifiedSince:">
+              <t hangText="updatedSince:">
                 Returns only contacts that have been modified on or after the given time, specified
-                as an xs:dateTime. The filter is based on the value of the <spanx style="verb">modified</spanx> field,
+                as an xs:dateTime. The filter is based on the value of the <spanx style="verb">updated</spanx> field,
                 and can be used independently of other filters or combined. It enables a basic syndication pattern when
                 accessing the same data over time. The first API call returns all data, which can be stored locally.
-                Subsequent API calls can specify <spanx style="verb">modifiedSince</spanx> with the time of the last
+                Subsequent API calls can specify <spanx style="verb">updatedSince</spanx> with the time of the last
                 API call, so that only contacts that have been added or modified since the last API call will be returned.
               </t>
             </list>
@@ -287,7 +290,7 @@ WWW-Authenticate: Basic realm="sample.site.org"
                 The sort order is determine by the <spanx style="verb">sortOrder</spanx> parameter.
                 If <spanx style="verb">sortBy</spanx> is a Singular Field, contacts are sorted according
                 to that field’s value; if it’s a Plural Field, contacts are sorted by the Value
-                (or Major Value, if it’s a Plural Bundle Field) of the field marked with “primary”: “true”,
+                (or Major Value, if it’s a Plural Bundle Field) of the field marked with "primary": "true",
                 if any, or else the first value in the list, if any, or else they are sorted last if the
                 given contact has no data for the given field.
               </t>
@@ -303,32 +306,32 @@ WWW-Authenticate: Basic realm="sample.site.org"
 
         <section title="Pagination">
           <t>
-            The pagination parameters can be used together to “page through” a large number of results:
+            The pagination parameters can be used together to "page through" a large number of results:
             
             <list style="hanging">
               <t hangText="startIndex:">
                 Specifies the offset of the first result to be returned with respect to the list
                 of contacts that would be returned if no offset were provided. For instance, if
                 in a given request 10 contacts would normally be provided, if <spanx style="verb">startIndex</spanx>
-                is 7 and no <spanx style="verb">limit</spanx> is specified, then only the last 3 contacts in that
+                is 7 and no <spanx style="verb">count</spanx> is specified, then only the last 3 contacts in that
                 list would be returned (contacts are zero-indexed). If <spanx style="verb">startIndex</spanx> is
                 greater than or equal to the total number of results that would be returned, no contacts are returned.
                 Value MUST be a non-negative integer and defaults to 0 if none specified.
               </t>
-              <t hangText="limit:">
+              <t hangText="count:">
                 If non-zero, specifies the maximum number of contacts the service provider will return.
                 Value MUST be a non-negative integer and defaults to 0 if none is specified. Specifying
-                a <spanx style="verb">limit</spanx> of 0 means that no limit should be placed
-                on the number of contacts returned. Otherwise, at most <spanx style="verb">limit</spanx>
+                a <spanx style="verb">count</spanx> of 0 means that no limit should be placed
+                on the number of contacts returned. Otherwise, at most <spanx style="verb">count</spanx>
                 contacts will be returned, starting at <spanx style="verb">startIndex</spanx> and counting
                 up from there.
               </t>
             </list>
             
-            For instance, on an initial query, specifying <spanx style="verb">startIndex=0&amp;limit=10</spanx>
+            For instance, on an initial query, specifying <spanx style="verb">startIndex=0&amp;count=10</spanx>
             will return the first only the first 10 results. The total number of possible results is indicated
-            by the totalCount field of results, so the client knows how many “pages” of results exist.
-            A subsequent query of <spanx style="verb">startIndex=10&amp;limit=10</spanx> will return the next
+            by the totalCount field of results, so the client knows how many "pages" of results exist.
+            A subsequent query of <spanx style="verb">startIndex=10&amp;count=10</spanx> will return the next
             10 results, and so on.
           </t>
         </section>
@@ -340,16 +343,15 @@ WWW-Authenticate: Basic realm="sample.site.org"
             
             <list style="hanging">
               <t hangText="format:">
-                Specifies the format in which the response data is returned. Supports: JSON (http://json.org)
-                or XML (http://www.w3.org/XML/) and defaults to JSON is none specified.
+                Specifies the format in which the response data is returned. Service Providers MUST support the values <spanx style="verb">json</spanx> for JSON (http://json.org) and <spanx style="verb">xml</spanx> for XML (http://www.w3.org/XML/) and MAY support additional formats if desired. The format defaults to json if no format is specified.
                 The data structure returned is equivalent in both formats,
                 with the only difference is in the encoding of the data. Singlular Fields are encoded as string
-                key/value pairs in JSON and tags with text content in XML, e.g. “field”: “value” and
+                key/value pairs in JSON and tags with text content in XML, e.g. "field": "value" and
                 &lt;field&gt;value&lt;/field&gt; respectively. Plural Fields and Plural Bundles are encoded as
-                arrays in JSON and repeated tags in XML, e.g. “field”: [ “value1”, “value2” ] and
+                arrays in JSON and repeated tags in XML, e.g. "field": [ "value1", "value2" ] and
                 &lt;field&gt;value1&lt;/field&gt;&lt;field&lt;value2&lt;/field&gt; respectively.
                 Nodes with multiple sub-nodes are represented as objects in JSON and tags with
-                sub-tags in XML, e.g. “field”: { “subfield1”: “value1”, “subfield2”: “value2” }
+                sub-tags in XML, e.g. "field": { "subfield1": "value1", "subfield2": "value2" }
                 and &lt;field&gt;&lt;subfield1&gt;&lt;value1&gt;&lt;/subfield1&gt;&lt;subfield2&gt;value2&lt;/subfield2&gt;&lt;/field&gt;
                 respectively.
               </t>
@@ -357,13 +359,13 @@ WWW-Authenticate: Basic realm="sample.site.org"
                 If non-empty, each contact returned SHALL contain only the fields explicitly requested.
                 Service Provider MAY return a subset of the requested fields if they are not supported.
                 This field is used for efficiency when the client only wishes to access a subset of the
-                fields normally returned in results. Value is a comma seperated list of top level field names
-                and defaults to an emply list which means all fields.
+                fields normally returned in results. Value is a comma seperated list of top level field names (e.g. <spanx style="verb">id,name,email,photo</spanx>)
+                and defaults to an emply list which means all available fields should be returned.
               </t>
               <t hangText="callback:">
                 Only applies if format=json, if so, the output is wrapped in a call to the given callback
                 function, for use with AJAX JSON-P callback invocation. For instance, if the result would
-                normally be { “field”: “value” } and callback=myFunc, the output would be myFunc({“field”: “value”});
+                normally be { "field": "value" } and callback=myFunc, the output would be myFunc({"field": "value"});
                 See http://developer.yahoo.com/common/json.html#callbackparam for more information. Value
                 is a JavaScript callback function name. Callback function names may only use upper and
                 lowercase alphabetic characters (A-Z, a-z), numbers (0-9), the period (.), the underscore (_),
@@ -377,6 +379,38 @@ WWW-Authenticate: Basic realm="sample.site.org"
 
       <section title="Response Format" anchor="response-format">
         <t>
+          The structure of the response object returned from a successful request is as follows. The root element is <spanx style="verb">response</spanx>, which is shown explicitly as the root element in XML format, and is the anonymous root object returned when the format is json (i.e. in JSON, the response returned is the object value of the response node). The <spanx style="verb">response</spanx> node MUST contain the following child nodes, and MAY contain additional nodes that the Service Provider wishes to add to expose additional data. Note that <spanx style="verb">startIndex</spanx>, <spanx style="verb">itemsPerPage</spanx>, and <spanx style="verb">totalCount</spanx> are based on OpenSearch (TODO: add xref).
+          <list style="symbols">
+            <t>
+              <spanx style="verb">status</spanx>: an object indicating the success or failure of the given request, along with the version of PortableContacts supported by the Service Provider. This node MUST contain the following child nodes:             
+              <list style="symbols">
+                <t>
+                  <spanx style="verb">code</spanx>: the numeric response code, based on HTTP response codes, as specified in <xref target="error-codes" />.
+                </t>
+                <t>
+                  <spanx style="verb">reason</spanx>: a human-readable explanation for the response code. This is intended to provide additional information to developers, and MAY be unsuitable for direct display to end-users. Consumers SHOULD take responsibility for showing appropriate error messages to users when the Service Provider returns an error.
+                </t>
+                <t>
+                  <spanx style="verb">version</spanx>: for now, the Service Provider MUST always return the value <spanx style="verb">1.0</spanx> to indicate its support for Portable Contacts. Future versions of Portable Contacts MAY change this version number, and Consumers designed only for this spec SHOULD check the version before processing any results and SHOULD NOT try to process results from a Service Provider that returns a version other than 1.0.
+                </t>                
+              </list>
+            </t>
+            <t>
+              <spanx style="verb">startIndex</spanx>: the index of the first result returned in thi response, relative to the starting index of all results that would be returned if no <spanx style="verb">startIndex</spanx> had been requested. In general, this will be equal to the value requested by the <spanx style="verb">startIndex</spanx>, or 0 if no specific <spanx style="verb">startIndex</spanx> was requested.
+            </t>
+            <t>
+              <spanx style="verb">itemsPerPage</spanx>: the number of results returned per page in this response. In general, this will be equal to the <spanx style="verb">count</spanx> Query Parameter, but MAY be less if the Service Provider is unwilling to return as many results per page as requested, or if there are less than the requested number of results left to return when starting at the current <spanx style="verb">startIndex</spanx>.
+            </t>
+            <t>
+              <spanx style="verb">totalResults</spanx>: the total number of contacts that would be returned if there were no <spanx style="verb">startIndex</spanx> or <spanx style="verb">count</spanx> specified. This value tells the Consumer how many total results to expect, regardless of the current pagination being used, but taking into account the current filtering options in the request.
+            </t>
+            <t>
+              <spanx style="verb">totalResults</spanx>: the total number of contacts that would be returned if there were no <spanx style="verb">startIndex</spanx> or <spanx style="verb">count</spanx> specified. This value tells the Consumer how many total results to expect, regardless of the current pagination being used, but taking into account the current filtering options in the request.
+            </t>
+            <t>
+              <spanx style="verb">entry</spanx>: an array of Contact objects, one for each contact matching the request. For consistency of parsing, this value MUST always be an array of results, even if there happens to be 0 or 1 matching result.
+            </t>            
+          </list>
         </t>
       </section>
 
@@ -515,7 +549,7 @@ WWW-Authenticate: Basic realm="sample.site.org"
             <t hangText="honorificSuffix:">
               0 or 1 per <spanx style="verb">contact</spanx> element with type xs:string.
             </t>
-            <t hangText="bday:">
+            <t hangText="birthday:">
               0 or 1 per <spanx style="verb">contact</spanx> element with type xs:date. The
               year value MAY be set to <spanx style="verb">0000</spanx> when the age of the
               Contact is private or the year is not available.
@@ -664,10 +698,14 @@ WWW-Authenticate: Basic realm="sample.site.org"
             <t hangText="domain:">
               1 per <spanx style="verb">account</spanx> element with type xs:string.
             </t>
-            <t hangText="localId:">
-              1 per <spanx style="verb">account</spanx> element with type xs:string.
+            <t hangText="userName:">
+              0 or 1 per <spanx style="verb">account</spanx> element with type xs:string.
+            </t>
+            <t hangText="userId:">
+              0 or 1 per <spanx style="verb">account</spanx> element with type xs:string.
             </t>
           </list>
+          Note that at least one of <spanx style="verb">userId</spanx> or <spanx style="verb">userName</spanx> MUST be present for each <spanx style="verb">account</spanx>.
         </t>
       </section>
 
@@ -680,6 +718,120 @@ WWW-Authenticate: Basic realm="sample.site.org"
 
     <appendix title="Appendix A - Example">
       <t>
+        Here is a sample request and response that illustrates much of Portable Contacts. For simplicity, authorization information is not shown in the request.
+      </t>
+      <t>Sample request (via HTTP GET):</t>
+      <t>
+        <figure>
+          <artwork>
+http://sample.site.org/path/to/api/@me/@all?startIndex=10&count=10&sortBy=name
+          </artwork>
+        </figure>
+      </t>
+      <t>Sample response:</t>
+      <t>
+        <figure>
+          <artwork>
+{
+  "status": {
+    "code": 200,
+    "reason": "OK",
+    "version": "1.0",
+  },
+  "totalResults": 12,
+  "startIndex": 10
+  "itemsPerPage": 10
+  "entry": [
+    {
+      "id": "123,"
+      "name": "Minimal Contact"
+    }
+    {
+      "id": "703887", 
+      "name": "Mark Hashimoto",
+      "familyName": "Hashimoto", 
+      "givenName": "Mark", 
+      "birthday": "0000-01-16",       
+      "gender": "male",
+      "drinker": "heavily",
+      "tags": [
+        "plaxo guy"
+      ],
+      "email": [
+        {
+          "value": "mhashimoto-04@plaxo.com", 
+          "type": "work",
+          "primary": "true",
+        }, 
+        {
+          "value": "mhashimoto-04@plaxo.com", 
+          "type": "home"
+        }, 
+        {
+          "value": "mhashimoto@plaxo.com", 
+          "type": "home"
+        }
+      ], 
+      "url": [
+        {
+          "value": "http://www.seeyellow.com", 
+          "type": "work"
+        }, 
+        {
+          "value": "http://www.angryalien.com", 
+          "type": "home"
+        }
+      ], 
+      "phoneNumber": [
+        {
+          "value": "KLONDIKE5", 
+          "type": "work"
+        },
+        {
+          "value": "650-123-4567",
+          "type": "mobile"
+        }
+      ], 
+      "photo": [
+        {
+          "value": "http://sdev04.plaxo.com/fetch_image?path=2706_1_-78265666", 
+          "type": "thumbnail"
+        }
+      ], 
+      "im": [
+        {
+          "value": "plaxodev8", 
+          "type": "aim"
+        }
+      ], 
+      "address": [
+        {
+          "type": "home", 
+          "streetAddress": "742 Evergreen Terrace\nSuite 123", 
+          "locality": "Springfield", 
+          "region": "VT",
+          "postalCode": "12345",
+          "country": "USA",
+          "formatted": 742 Evergreen Terrace\nSuite 123\nSpringfield, VT 12345 USA"
+        }
+      ], 
+      "job": [
+        {
+          "name": "Burns Worldwide", 
+          "title": "Head Bee Guy"
+        }
+      ], 
+      "account": [
+        {
+          "domain": "plaxo.com", 
+          "userId": "2706"
+        }
+      ]
+    }
+  ]
+}          
+          </artwork>
+        </figure>
       </t>
     </appendix>
 
