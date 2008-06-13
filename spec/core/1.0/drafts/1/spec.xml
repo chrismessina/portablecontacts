@@ -51,7 +51,7 @@
       <t>
         <list style="hanging">
           <t hangText="Contact:">
-            .
+            A record describing information about a particular person or entity, consistenting of contact information (sometimes including name, e-mail addresses, phone numbers, and other information) and other information, as is typically found in address book and social networking applications.
           </t>
           <t hangText="Service Provider:">
             A web application that provides Contacts information
@@ -61,37 +61,130 @@
             A website or application that uses the Portable Contacts protocol
             to request contacts managed by the Service Provider.
           </t>
+          <t hangText="Base URL:">
+            The root endpoint URL specified by the Service Provider during Discovery and used to make requests. Consumers MAY append additonal path information and query string parameters to this URL as part of the request.
+          </t>
         </list>
       </t>
     </section>
 
-    <section title="Overview">
+    <section title="Introduction">
       <t>
+        This API defines a language- and platform- neutral protocol for Consumers to request address book, profile, and friends-list information from Service Providers. As a protocol, it is indeded to be easy to understand and implement, either as a Service Provider or Consumer, using any language or platform of choice. It is also intended to be implemented by both individuals and small services as well as large providers, in any case where a service contains data about who a user knows and wishes to make that information portable, under the user's control.
+      </t>
+      <t>
+        While there are currently standards for describing contact info (such as vCard), these standards do not specify how to discover, access, and manipulate this information, and they do not capture the full range of information typically found in modern address book and social networking applications. Several large companies have also released their own custom, proprietary APIs for accessing contact info, but they are all different, which creates a burden for developers wishing to interact with several providers, and does not inform additional providers as to how they should construct a similar API. Thus Portable Contacts is an attempt to specify a complete, modern, and simple recipe for providers of all sizes to make this data available in a standard way.
+      </t>
+      <section title="Goals">
+        <t>
+          The goal of Portable Contacts is to make it easier for developers to give their users a secure way to access the address books and friends lists they have built up all over the web. Specifically, we seek to create:
+          <list style="symbols">
+            <t>A common access pattern and contact schema that any site can provide</t>
+            <t>Well-specified authentication and access rules</t>
+            <t>Standard libraries that can work with any site</t>
+            <t>and absolutely minimal complexity, with the lightest possible toolchain requirements for developers.</t>
+          </list>
+        </t>
+        <t>
+          A measure of our success will be the elimination of the "password anti-pattern," by making it far easier to implement Portable Contacts than to engage in scraping, as well as a dramatic increase in the number of sites that both provide and consume who-you-know data.
+        </t>
+      </section>
+      <section title="Approach">
+        <t>
+          Our design is focused around ease of adoption, which means a few things. First, our emphasis is on simplicity of design and targeted use cases. For example, version 1 is simply about access, and defers for now on the more complex issues around update and sync. Second, we're taking a modern approach to who-you-know data by unifying traditional contact info and social network data, in order to properly represent the current diversity of the social web ecosystem. Third, we're using existing standards wherever possible, including vCard, OpenSocial, XRDS-Simple, OAuth, etc. And lastly, we're designing something that should be easy for current service providers to adopt. We started by reviewing all the major existing contacts APIs and targeting the capabilities that they all share and provide. We believe this pragmatic balance is the best and quickest way to achieve our shared goal of widespread adoption.
+        </t>
+      </section>
+    </section>
+    
+    <section title="Workflow Overview">
+      <t>
+        A Consumer wishing to access a user's data via Portable Contacts must start with an Initial Identifier for the Service Provider containing the user's data, usually provided by the user. In many cases, this may be the domain name of the Service Provider's web site, such as sample.site.org, but may be a more specific URL, such as the OpenID URL of the user, if available. Consumers then perform Discovery on the Initial Identifier to determine where the Portable Contacts endpoint for this Service Provider resides. If successful, the Consumer may then attempt to request information from that endpoint. If the endpoint contains private data, the Service Provider will return an authorization challenge, and the Consumer must then guide the user through an appropriate authorization flow to obtain the credentials necessary to access this private data. Upon successful authorization, the Consumer may request data from the Portable Contacts endpoint using these authorization credentials. Whether accessing public or private data, Consumers may request a specific subset of the user's data using standard Query Parameters. Upon a successful request, the data is returned in the response, and the Consumer may then parse the response data and use it as desired. The following sections detail each of these steps.
       </t>
     </section>
 
-    <section title="Discovery">
+    <section title="Discovery" anchor="discovery">
       <t>
-        Portable contacts API endpoint is discoverable from the domain root using XRDS-Simple (YADIS).
-        Will specify new URI type for this service.
-        Endpoint is base URL for API; additional path and query vars can be appended during invocation.
+        Portable contacts API endpoint is discoverable from the domain root using XRDS-Simple (previously known as YADIS).
+        The API is identified by the Service Type http://portablecontacts.net/spec/1.0 and the corresponding URI is the Base URL for the API. The Base URL MUST NOT contain any query string, as additional path information and query string variables MAY be appended by Consumers as part of forming the request (as described in detail below).
+      </t>
+      <t>
+        An example XRDS-Simple document describing the availability and location of a Portable Contacts endpoint might look like this:
+        <figure>
+          <artwork><![CDATA[
+<XRDS xmlns="xri://$xrds">
+  <XRD xmlns:simple="http://xrds-simple.net/core/1.0" xmlns="xri://$XRD*($v*2.0)" version="2.0">
+    <Type>xri://$xrds*simple</Type>
+    <Service>
+      <Type>http://portablecontacts.net/spec/1.0</Type>
+      <URI>http://sample.site.org/path/to/api/</URI>
+    </Service>
+  </XRD>
+</XRDS>          
+          ]]></artwork>
+        </figure>
+      </t>
+      <t>
+        In addition to discovering the endpoint itself, Service Providers using OAuth to protect responses MUST also support OAuth Discovery, as described in <xref target="auth" />.
       </t>
     </section>
 
     <section title="Invocation">
       <t>
+        All requests to the Service Provider are made as HTTP GET operations on a URL deriving from the Base URL specified in <xref target="discovery" />. Consumers MAY append additional path information and/or query string parameters to the Base URL as part of the request, as specified in <xref target="query-params" />. Additionally, authentication information MAY be sent via additional HTTP heades in the request, as specified in <xref target="auth" />. Responses are returned in the body of the HTTP response, formatted as JSON or XML, depending on what is requested. Response and error codes SHOULD be transmitted via the HTTP stauts code of the response (if possible), and SHOULD also be specified in the body of the response, as described in <xref target="response-format" /> and <xref target="error-codes" />. Since the API endpoint is dynamic (and not serving static content), Consumers MUST NOT interpret any cache headers in the response as having meaning concerning when the same URL request might return a different response upon subsequent invocation.
       </t>
 
-      <section title="Authentication and Authorization">
+      <section title="Authentication and Authorization" anchor="auth">
         <t>
+          The data returned by a Portable Contacts endpoint MAY contain public data, or it MAY contain private data. If the data returned is public, no authentication or authorization is required. In most cases however, the data returned is not public, and Service Providers SHOULD ensure that the user has given prior consent, either explicitly or implicitly, for their information to be released by this API. Typically this is done by Consumers obtaining either Direct Authorization (with raw credentials, for example the user's username and password) or Delegated Authorization (with an access token obtained out-of-band by the user, and given to the Consumer to present as part of the request). Portable Contacts specifies standard mechanisms for both types of authorization, so that Consumers may be able to obtain private data on a user's behalf from Service Providers in an automated and consistent fashion. Regardless of the Authorization method used, the context of the request (i.e. the user for whom data is being requested) MUST be inferred by Service Providers from the Base URL and the authorization credentials provided. If public data is being accessed (and no authorization is provided), the Base URL MUST contain enough information for Service Providers to know which data to return, but if private data is being accessed (and authorization is provided), the same Base URL MAY return information for different users depending on the authorization credentials provided.
+        </t>
+        <section title="Delegated Authorization">
+          <t>
+            Service Providers wishing to provide Delegated Authorization MUST support <xref target="OAuth Core 1.0" /> as an OAuth Service Provider, and MAY also support additional Delegated Authorization mechanisms, if they choose. Service Providers supporting OAuth MUST also support OAuth Discovery (TODO: xref) to facilitate automatic discovery of authorization endpoints for Consumers. Service Providers SHOULD provide a mechanism for Consumers to automatically obtain a Consumer Key and Consumer Secret, but MAY require this to be done out-of-band.
+          </t>
+        </section>
+        <section title="Direct Authorization">
+          <t>
+            Service Providers wishing to provide Direct Authorization MUST support HTTP-Basic (TODO: xref) authentication, and MAY also support additional Direct Authorization mechanisms, if they choose. In addition to being a well-established mechanism for Direct Authorization, HTTP Basic has the added benefit of being understood by most Web Browsers, and can prompt users to enter their credentials as part of accessing a resource protected in this manner. There are also convenient ways of providing and parsing HTTP Basic credentials in popular tools and libraries like curl and PHP.
+          </t>
+        </section>
+          <section title="Available Authorization Methods">
+          <t>
+            Service Providers that provide access to private data MAY choose not to support either Direct Authorization or Delegated Authorization, depending on their security requirements, but they MUST support either OAuth or HTTP Basic auth if they require any Authorization. When accessing a Portable Contacts endpoint, if sufficient authorization credentials are not provided, the Service Provider SHOULD return a 401 Unauthorized response, and SHOULD provide the available Authorization mechanisms available by including WWW-Authenticate headers in the response for each type of Authorization method supported. Consumers will then be able to recognize that the API is a protected resource and initiate the proper Authorization process needed to obtain the appropriate credentials. An example set of WWW-Authenticate headers returned by a Service Provider that supports both OAuth and HTTP Basic might look like this:
+            <figure>
+              <artwork>
+WWW-Authenticate: OAuth realm="sample.site.org"
+WWW-Authenticate: Basic realm="sample.site.org"
+              </artwork>
+            </figure>
+          </t>
+          <t>
+            If Service Providers wish to make some response data publicly available and also provide additional info given the proper authorization credentials, they SHOULD provide a 200 OK response to requests without authorization with a WWW-Authenticate header in the response indicating that additional info is available via the specified authorization mechanisms.
+          </t>
+        </section>
+      </section>
+      
+      <section title="Additional Path Information">
+        <t>
+          A request using the Base URL alone MUST yield a result, providing that adequate authorization credentials are provided. In addition, Consumers MAY append additional path information to the Base URL to request more specific information. Service Providers MUST recognize the following additional path information when appended to the Base URL, and MUST return the corresponding data:
+          <list style="symbols">
+            <t>
+              <spanx style="verb">/@me/@all</spanx> -- Return all contact info (equivalent to providing no additional path info)
+            </t>
+            <t>
+              <spanx style="verb">/@me/@all/{ID}</spanx> -- Only return contact info for the contact whose <spanx style="verb">id</spanx> value is equal to the provided {ID}, if such a contact exists. In this case, the response format is the same as when requesting all contacts, but any contacts not matching the requested ID MUST be filtered out of the result list by the Service Provider
+            </t>
+            <t>
+              <spanx style="verb">/@me/@self</spanx> -- Return contact info for the owner of this information, i.e. the user on whose behalf this request is being made. In this case, the response format is the same as when requesting all contacts, but any contacts not matching the requested ID MUST be filtered out of the result list by the Service Provider.
+            </t>
+          </list>
         </t>
       </section>
 
-      <section title="Query Parameters">
+      <section title="Query Parameters" anchor="query-params">
         <t>
           Portable Contacts defines a standard set of operations that can be used
           to filter, sort, and paginate response results. The operations are specified
-          by adding query parameter to the request URL, either in the query string or as
+          by adding query parameter to the Base URL, either in the query string or as
           HTTP POST data.
         </t>
 
@@ -282,12 +375,12 @@
 
       </section>
 
-      <section title="Response Format">
+      <section title="Response Format" anchor="response-format">
         <t>
         </t>
       </section>
 
-      <section title="Error Codes">
+      <section title="Error Codes" anchor="error-codes">
         <t>
           The Service Provider MUST return a response code with every response.
           Response codes are numeric and based on existing HTTP response codes,
