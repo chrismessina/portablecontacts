@@ -696,7 +696,7 @@ http://sample.site.org/path/to/api/@me/@all?startIndex=10&count=10&sortBy=name
   "totalResults": 12,
   "entry": [
     {
-      "id": "123,"
+      "id": "123",
       "name": "Minimal Contact"
     },
     {
@@ -714,7 +714,7 @@ http://sample.site.org/path/to/api/@me/@all?startIndex=10&count=10&sortBy=name
         {
           "value": "mhashimoto-04@plaxo.com",
           "type": "work",
-          "primary": "true",
+          "primary": "true"
         },
         {
           "value": "mhashimoto-04@plaxo.com",
