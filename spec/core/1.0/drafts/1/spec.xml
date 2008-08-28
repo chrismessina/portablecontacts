@@ -84,15 +84,16 @@
         This API defines a language- and platform- neutral protocol for Consumers to request address book, profile, and friends-list information from Service Providers. As a protocol, it is intended to be easy to understand and implement, either as a Service Provider or Consumer, using any language or platform of choice. It is also intended to be implemented by both individuals and small services as well as large providers, in any case where a service contains data about who a user knows and wishes to make that information portable, under the user's control.
       </t>
       <t>
-        While there are currently standards for describing contact info (such as vCard), these standards do not specify how to discover, access, and manipulate this information, and they do not capture the full range of information typically found in modern address book and social networking applications. Several large companies have also released their own custom, proprietary APIs for accessing contact info, but they are all different, which creates a burden for developers wishing to interact with several providers, and does not inform additional providers as to how they should construct a similar API. Thus Portable Contacts is an attempt to specify a complete, modern, and simple recipe for providers of all sizes to make this data available in a standard way.
+        While there are currently standards for describing contact info (such as vCard), these standards do not specify how to discover, access, and manipulate this information, and they do not capture the full range of information typically found in modern address book and social networking applications. Several large companies have also released their own non-standard APIs for accessing and interacting with contact information, increasing the burden on developers and Consumers who wish to support most or all Service Providers. Nor do these APIs inform other providers as to how they should construct similar APIs. Thus Portable Contacts is an attempt to specify a complete, modern, and straight-forward recipe for Service Providers and Consumers of all sizes to make available and consume contact data in a standardized way.
       </t>
       <section title="Goals">
         <t>
           The goal of Portable Contacts is to make it easier for developers to give their users a secure way to access the address books and friends lists they have built up all over the web. Specifically, we seek to create:
           <list style="symbols">
-            <t>A common access pattern and contact schema that any site can provide</t>
-            <t>Well-specified authentication and access rules</t>
-            <t>Standard libraries that can work with any site</t>
+            <t>A common access pattern and contact schema that any Service Provider can implement</t>
+            <t>Well-specified authorization and access rules</t>
+            <t>Free and open source libraries in many languages for most popular platforms</t>
+            <t>Community-sourced support, documentation, and collaborative tools</t>
             <t>and absolutely minimal complexity, with the lightest possible toolchain requirements for developers.</t>
           </list>
         </t>
@@ -102,20 +103,34 @@
       </section>
       <section title="Approach">
         <t>
-          Our design is focused around ease of adoption, which means a few things. First, our emphasis is on simplicity of design and targeted use cases. For example, version 1 is simply about access, and defers for now on the more complex issues around update and sync. Second, we're taking a modern approach to who-you-know data by unifying traditional contact info and social network data, in order to properly represent the current diversity of the social web ecosystem. Third, we're using existing standards wherever possible, including vCard, OpenSocial, XRDS-Simple, OAuth, etc. And lastly, we're designing something that should be easy for current service providers to adopt. We started by reviewing all the major existing contacts APIs and targeting the capabilities that they all share and provide. We believe this pragmatic balance is the best and quickest way to achieve our shared goal of widespread adoption.
+          Our design is focused around ease of adoption, which means a few things:
+          <list style="numbers">
+            <t>
+              First, our emphasis is on simplicity of design and targeted use cases, keeping our scope intentionally narrow at the outset. For example, version 1 is simply about access, and defers for now on the more complex issues around update and sync.
+            </t>
+            <t>
+              Second, we're taking a modern approach to who-you-know data by unifying traditional contact information and social network data, in order to properly represent the current diversity of the social web ecosystem. 
+            </t>
+            <t>
+              Third, we're reusing existing standards wherever possible, including vCard, OpenSocial, XRDS-Simple, OAuth, etc.
+            </t>
+            <t>
+              And lastly, we're designing something that should be easy for current service providers to adopt. We started with a review of all the major existing contacts APIs and targeted common capabilities that they all share and provide. We believe this pragmatic balance is the best and quickest way to achieve our intended goal of widespread adoption.
+            </t>
+          </list>
         </t>
       </section>
     </section>
 
     <section title="Workflow Overview">
       <t>
-        A Consumer wishing to access a user's data via Portable Contacts must start with an Initial Identifier for the Service Provider containing the user's data, usually provided by the user. In many cases, this may be the domain name of the Service Provider's web site, such as sample.site.org, but may be a more specific URL, such as the OpenID URL of the user, if available. Consumers then perform Discovery on the Initial Identifier to determine where the Portable Contacts endpoint for this Service Provider resides. If successful, the Consumer may then attempt to request information from that endpoint. If the endpoint contains private data, the Service Provider will return an authorization challenge, and the Consumer must then guide the user through an appropriate authorization flow to obtain the credentials necessary to access this private data. Upon successful authorization, the Consumer may request data from the Portable Contacts endpoint using these authorization credentials. Whether accessing public or private data, Consumers may request a specific subset of the user's data using standard Query Parameters. Upon a successful request, the data is returned in the response, and the Consumer may then parse the response data and use it as desired. The following sections detail each of these steps.
+        A Consumer wishing to access a user's data via Portable Contacts must start with an Initial Identifier for the Service Provider containing the user's data, usually provided by the user. In many cases, this may be the domain name of the Service Provider's web site, such as sample.site.org, but may be a more specific URL, such as the OpenID identifier of the user, if available. Consumers then perform Discovery on the Initial Identifier to determine where the Portable Contacts endpoint for this Service Provider resides. If successful, the Consumer may then attempt to request information from that endpoint. If the endpoint contains private data, the Service Provider will return an authorization challenge, and the Consumer must then guide the user through an appropriate authorization flow to obtain the credentials necessary to access this private data. Upon successful authorization, the Consumer may request data from the Portable Contacts endpoint using these authorization credentials. Whether accessing public or private data, Consumers may request a specific subset of the user's data using standard Query Parameters. Upon a successful request, the data is returned in the response, and the Consumer may then parse the response data and use it as desired. The following sections detail each of these steps.
       </t>
     </section>
 
     <section title="Discovery" anchor="discovery">
       <t>
-        Portable contacts API endpoint is discoverable from the domain root using <xref target="XRDS-Simple" /> (previously known as YADIS). The API is identified by the Service Type http://portablecontacts.net/spec/1.0 and the corresponding URI is the Base URL for the API. The Base URL MUST NOT contain any query string, as additional path information and query string variables MAY be appended by Consumers as part of forming the request (as described in detail below).
+        Portable Contacts API endpoint is discoverable from the domain root using <xref target="XRDS-Simple" /> (previously known as YADIS). The API is identified by the Service Type http://portablecontacts.net/spec/1.0 and the corresponding URI is the Base URL for the API. The Base URL MUST NOT contain any query string, as additional path information and query string variables MAY be appended by Consumers as part of forming the request (as described in detail below).
       </t>
       <t>
         An example XRDS-Simple document describing the availability and location of a Portable Contacts endpoint might look like this:
@@ -175,7 +190,7 @@ WWW-Authenticate: Basic realm="sample.site.org"
 
       <section title="Additional Path Information">
         <t>
-          A request using the Base URL alone MUST yield a result, providing that adequate authorization credentials are provided. In addition, Consumers MAY append additional path information to the Base URL to request more specific information. Service Providers MUST recognize the following additional path information when appended to the Base URL, and MUST return the corresponding data:
+          A request using the Base URL alone MUST yield a result, assuming that adequate authorization credentials are provided. In addition, Consumers MAY append additional path information to the Base URL to request more specific information. Service Providers MUST recognize the following additional path information when appended to the Base URL, and MUST return the corresponding data:
           <list style="symbols">
             <t>
               <spanx style="verb">/@me/@all</spanx> -- Return all contact info (equivalent to providing no additional path info)
@@ -197,7 +212,7 @@ WWW-Authenticate: Basic realm="sample.site.org"
 
         <section title="Filtering">
           <t>
-            Filtering is used to limit the request results to Contacts that match a given criterion. Content filtering is accomplished by combining three request parameters:
+            Filtering is used to limit the request results to Contacts that match given criteria. Content filtering is accomplished by combining three request parameters:
 
             <list style="hanging">
               <t hangText="filterBy:">
@@ -219,7 +234,7 @@ WWW-Authenticate: Basic realm="sample.site.org"
                   </t>
                   <t>
                     <spanx style="verb">present</spanx>: a Contact matches the criterion if the field specified by
-                    <spanx style="verb">filterBy</spanx> has a non-empty value, or if it contains a non empty node for complex fields.
+                    <spanx style="verb">filterBy</spanx> has a non-empty value, or if it contains a non-empty node for complex fields.
                   </t>
                 </list>
               </t>
@@ -301,7 +316,7 @@ WWW-Authenticate: Basic realm="sample.site.org"
             </list>
 
             For instance, on an initial query, specifying <spanx style="verb">startIndex=0&amp;count=10</spanx>
-            will return the first only the first 10 results. The total number of possible results is indicated by the <spanx style="verb">totalResults</spanx> field of results, so the client knows how many "pages" of results exist. A subsequent query of <spanx style="verb">startIndex=10&amp;count=10</spanx> will return the next 10 results, and so on.
+            will return only the first 10 results. The total number of possible results is indicated by the <spanx style="verb">totalResults</spanx> field of results, so the client knows how many "pages" of results exist. A subsequent query of <spanx style="verb">startIndex=10&amp;count=10</spanx> will return the next 10 results, and so on.
           </t>
         </section>
 
@@ -325,7 +340,7 @@ WWW-Authenticate: Basic realm="sample.site.org"
             Providers SHOULD honor all filtering, sorting, and pagination requests specified via Query Parameters. However, in some instances it may be too burdensome to comply with a particular request, e.g. because the Provider does not have an efficient database index set up for a given field that is requested for filtering or sorting, and is unable to efficiently fetch all data and post-process the results to honor the request before returning the response. In such cases, Providers MAY decline to honor the request (or specific pieces of the request). If any part of the request is declined, Providers MUST specify which part(s) of the request were declined in the response, using <spanx style="verb">"sorted": false</spanx>, <spanx style="verb">"filtered": false</spanx>, and/or <spanx style="verb">"updatedSince": false</spanx> as appropriate. For efficiency, Providers SHOULD omit these response fields if that part of the request was successfully performed, or if no such Query Parameter was specified in the request. 
           </t>
           <t>
-            Note that since all of the filtering, sorting, and pagination operations are designed to reduce the amount of data returned, it is possible for Consumers to emulate these operations client-side when a Provider declines to perform them server-side. For instance, filtering can be accomplished by iterating through each entry returned and deleting those that do not match the filtering criteria. Thus Consumers can request these operations to be performed server-side, and Providers will honor them if possible, and otherwise indicate to Consumers that they need to be performed client-side, effectively "splitting the workload" while maintaining a consistent semantics.
+            Note that since all of the filtering, sorting, and pagination operations are designed to reduce the amount of data returned, it is possible for Consumers to emulate these operations client-side when a Provider declines to perform them server-side. For instance, filtering can be accomplished by iterating through each entry returned and deleting those that do not match the filtering criteria. Thus Consumers can request these operations to be performed server-side, and Providers will honor them if possible, and otherwise indicate to Consumers that they need to be performed client-side, effectively "splitting the workload" while maintaining consistent semantics.
           </t>
         </section>
 
@@ -333,7 +348,7 @@ WWW-Authenticate: Basic realm="sample.site.org"
 
       <section title="Response Format" anchor="response-format">
         <t>
-          The structure of the response object returned from a successful request is as follows. The root element is <spanx style="verb">response</spanx>, which is shown explicitly as the root element in XML format, and is the anonymous root object returned when the format is json (i.e. in JSON, the response returned is the object value of the <spanx style="verb">response</spanx> node). The <spanx style="verb">response</spanx> node MUST contain the following child nodes, and MAY contain additional nodes that the Service Provider wishes to add to expose additional data. Note that <spanx style="verb">startIndex</spanx>, <spanx style="verb">itemsPerPage</spanx>, and <spanx style="verb">totalResults</spanx> are based on <xref target="OpenSearch" />. See the Appendix for a full example.
+          The structure of the response object returned from a successful request is as follows. The root element is <spanx style="verb">response</spanx>, which is shown explicitly as the root element in XML format, and is the anonymous root object returned when the format is JSON (i.e. in JSON, the response returned is the object value of the <spanx style="verb">response</spanx> node). The <spanx style="verb">response</spanx> node MUST contain the following child nodes, and MAY contain additional nodes that the Service Provider wishes to add to expose additional data. Note that <spanx style="verb">startIndex</spanx>, <spanx style="verb">itemsPerPage</spanx>, and <spanx style="verb">totalResults</spanx> are based on <xref target="OpenSearch" />. See the Appendix for a full example.
           <list style="symbols">
             <t>
               <spanx style="verb">startIndex</spanx>: the index of the first result returned in this response, relative to the starting index of all results that would be returned if no <spanx style="verb">startIndex</spanx> had been requested. In general, this will be equal to the value requested by the <spanx style="verb">startIndex</spanx>, or 0 if no specific <spanx style="verb">startIndex</spanx> was requested.
@@ -356,7 +371,7 @@ WWW-Authenticate: Basic realm="sample.site.org"
           The Service Provider MUST return a response code with every response. Response codes are numeric and conform to existing HTTP response codes where possible, as defined below. In addition to the response code, Service Providers SHOULD also provide a human-readable reason that explains the reason for the response code. This message SHOULD be intelligible to developers, but MAY be unsuitable for display to end-users. Clients SHOULD provide their own appropriate error message to users when encountering an error response.
         </t>
         <t>
-          Service Providers SHOULD conform to the following response codes to indicate the following situations. Service Providers MAY return additional codes to indicate additional information, but are encouraged to use these codes and augment them inside the reason rather than with a separate code.
+          Service Providers SHOULD conform to the following response codes to indicate the following situations. Service Providers MAY return additional codes to indicate additional information, but are discouraged from doing so and should instead augment the reason text with existing codes, if possible.
         </t>
         <t>
           <list style="hanging">
@@ -389,12 +404,12 @@ WWW-Authenticate: Basic realm="sample.site.org"
         The Contact schema defines the containers and attributes used to deliver an individual Contact or a list of Contacts as requested by the Consumer. The traditional contact info fields were taken directly from the vCard spec where possible <xref target="RFC2425" />, though instances of vCard's archaic spellings were modernized (e.g. <spanx style="verb">addresses</spanx> instead of <spanx style="verb">adr</spanx>). Even with the spelling updates, the field mappings remain equivalent, which means it should be easy to convert Portable Contacts data to and from vCard. By convention, Singular Fields have singular spelling (e.g. <spanx style="verb">displayName</spanx>) and plural fields have plural spelling (e.g. <spanx style="verb">phoneNumbers</spanx>) to make it easy to distinguish them.
       </t>
       <t>
-        Each contact returned MUST include the <spanx style="verb">id</spanx> and <spanx style="verb">displayName</spanx> fields with non-empty values, but all other fields are optional, and it is recognized that not all Service Providers will be able to provide data for all the supported fields. The field list is below is broad so that, for Service Providers that do support any of these fields, there is a standard field name available.
+        Each contact returned MUST include the <spanx style="verb">id</spanx> and <spanx style="verb">displayName</spanx> fields with non-empty values, but all other fields are optional, and it is recognized that not all Service Providers will be able to provide data for all the supported fields. The field list below is broad so that, for Service Providers that do support any of these fields, there is a standard field name available.
       </t>
 
       <section title="Structure" anchor="structure">
         <t>
-          Each field is defined as either a Singular Field, in which case there can be at most one instance of that field per contact, or as a Plural Field, which case any number of instances of that field may be present per contact.
+          Each field is defined as either a Singular Field, in which case there MUST NOT be more than one instance of that field per contact, or as a Plural Field, in which case any number of instances of that field MAY be present per contact.
         </t>
         <t>
           Contact information is formatted using labeled attributes with either structured or unstructured string data. Each attribute value consists of one of the following types:
@@ -517,7 +532,7 @@ WWW-Authenticate: Basic realm="sample.site.org"
                 URL of a photo of this contact. The value SHOULD be a canonicalized URL, and MUST point to an actual image file (e.g. a GIF, JPEG, or PNG image file) rather than to a web page containing an image. Service Providers MAY return the same image at different sizes, though it is recognized that no standard for describing images of various sizes currently exists. Note that this field SHOULD NOT be used to send down arbitrary photos taken by this user, but specifically profile photos of the contact suitable for display when describing the contact.
               </t>
               <t hangText="tags:">
-                A user-defined category label for this contact, e.g. "favorite" or "web20". These values SHOULD be case-insensitive, and there SHOULD NOT be multiple tags provided for a given contact that differ only in case. Note that this field is a Simple Field, meaning each instance consists only of a string value.
+                A user-defined category or label for this contact, e.g. "favorite" or "web20". These values SHOULD be case-insensitive, and there SHOULD NOT be multiple tags provided for a given contact that differ only in case. Note that this field is a Simple Field, meaning each instance consists only of a string value.
               </t>
               <t hangText="relationships:">
                 A bi-directionally asserted relationship type that was established between the user and this contact by the Service Provider. The value SHOULD conform to one of the XFN relationship values (e.g. kin, friend, contact, etc.) if appropriate, but MAY be an alternative value if needed. Note this field is a parallel set of category labels to the <spanx style="verb">tags</spanx> field, but relationships MUST have been bi-directionally confirmed, whereas tags are asserted by the user without acknowledgment by this Contact. Note that this field is a Simple Field, meaning each instance consists only of a string value.
@@ -619,7 +634,7 @@ WWW-Authenticate: Basic realm="sample.site.org"
               The department within this organization.
             </t>
             <t hangText="title:">
-              The job title or organizational role within this organization.
+              The job title or role within this organization.
             </t>
             <t hangText="type:">
               The type of organization, with Canonical Values <spanx style="verb">job</spanx> and <spanx style="verb">school</spanx>.
@@ -677,13 +692,13 @@ http://sample.site.org/path/to/api/@me/@all?startIndex=10&count=10&sortBy=name
           <artwork>
 {
   "startIndex": 10,
-  "itemsPerPage": 10
+  "itemsPerPage": 10,
   "totalResults": 12,
   "entry": [
     {
       "id": "123,"
       "name": "Minimal Contact"
-    }
+    },
     {
       "id": "703887",
       "name": "Mark Hashimoto",
@@ -750,10 +765,10 @@ http://sample.site.org/path/to/api/@me/@all?startIndex=10&count=10&sortBy=name
           "region": "VT",
           "postalCode": "12345",
           "country": "USA",
-          "formatted": 742 Evergreen Terrace\nSuite 123\nSpringfield, VT 12345 USA"
+          "formatted": "742 Evergreen Terrace\nSuite 123\nSpringfield, VT 12345 USA"
         }
       ],
-      "organization": [
+      "organizations": [
         {
           "name": "Burns Worldwide",
           "title": "Head Bee Guy"
