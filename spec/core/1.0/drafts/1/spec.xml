@@ -697,13 +697,15 @@ http://sample.site.org/path/to/api/@me/@all?startIndex=10&count=10&sortBy=name
   "entry": [
     {
       "id": "123",
-      "name": "Minimal Contact"
+      "displayName": "Minimal Contact"
     },
     {
       "id": "703887",
-      "name": "Mark Hashimoto",
-      "familyName": "Hashimoto",
-      "givenName": "Mark",
+      "displayName": "Mark Hashimoto",
+      "name": {
+        "familyName": "Hashimoto",
+        "givenName": "Mark"
+      },
       "birthday": "0000-01-16",
       "gender": "male",
       "drinker": "heavily",
