@@ -13,7 +13,7 @@
   <?rfc private="Implementers' Draft" ?>
 
   <front>
-    <title>Portable Contacts 1.0 Draft B</title>
+    <title>Portable Contacts 1.0 Draft C</title>
 
     <author initials="J" surname="Smarr" fullname="Joseph Smarr">
       <organization>Plaxo</organization>
@@ -207,7 +207,7 @@ WWW-Authenticate: Basic realm="sample.site.org"
 
       <section title="Query Parameters" anchor="query-params">
         <t>
-          Portable Contacts defines a standard set of operations that can be used to filter, sort, and paginate response results. The operations are specified by adding query parameter to the Base URL, either in the query string or as HTTP POST data.
+          Portable Contacts defines a standard set of operations that can be used to filter, sort, and paginate response results. The operations are specified by adding query parameter to the Base URL, either in the query string or as HTTP POST data. Providers MAY support additional query parameters not specified here, and Providers SHOULD ignore any query parameters they don't recognize.
         </t>
 
         <section title="Filtering">
@@ -216,10 +216,10 @@ WWW-Authenticate: Basic realm="sample.site.org"
 
             <list style="hanging">
               <t hangText="filterBy:">
-                Specifies the field name to filter by. If the specified field is a Plural Field, the Contact SHALL match if any of the instances of the given field match the specified criterion (e.g. if a contact has multiple <spanx style="verb">emails</spanx> values, only one has to match for the entire Contact to match). If a Simple Field is specified, its value must match the specified <spanx style="verb">filterValue</spanx> according to the specified <spanx style="verb">filterOp</spanx>. If a Complex Field is specified, its Primary Sub-Field must match. If the specified field is not a direct child of the <spanx style="verb">entry</spanx> element, the full path MUST be specified using the '.' character as separator. For example, to filter by gender the parameter value is <spanx style="verb">gender</spanx> and to filter by first name, the parameter value is <spanx style="value">name.givenName</spanx>. 
+                Specifies the field name to filter by. If the specified field is a Plural Field, the Contact SHALL match if any of the instances of the given field match the specified criterion (e.g. if a contact has multiple <spanx style="verb">emails</spanx> values, only one has to match for the entire Contact to match). If a Simple Field is specified, its value must match the specified <spanx style="verb">filterValue</spanx> according to the specified <spanx style="verb">filterOp</spanx>. If a Complex Field is specified, its Primary Sub-Field must match. If the specified field is not a direct child of the <spanx style="verb">entry</spanx> element, the full path MUST be specified using the '.' character as separator. For example, to filter by gender the parameter value is <spanx style="verb">gender</spanx> and to filter by first name, the parameter value is <spanx style="verb">name.givenName</spanx>. 
               </t>
               <t hangText="filterOp:">
-                Specifies the comparison method used to evaluate the field value with the value of the filter criterion. Allowed values are:
+                Specifies the comparison method used to evaluate the field value with the value of the filter criterion. Providers SHOULD support the following values:
                 <list style="symbols">
                   <t>
                     <spanx style="verb">equals</spanx>: the two values must be identical strings.
@@ -237,6 +237,7 @@ WWW-Authenticate: Basic realm="sample.site.org"
                     <spanx style="verb">filterBy</spanx> has a non-empty value, or if it contains a non-empty node for complex fields.
                   </t>
                 </list>
+                Providers MAY support additional filter operations if they choose. Providers MUST decline to filter results if the specified filter operation is not recognized (as per <xref target="declining" />).
               </t>
               <t hangText="filterValue:">
                 Specifies the value to filter by, using the comparison method defined by <spanx style="verb">filterOp</spanx>.
@@ -260,14 +261,14 @@ WWW-Authenticate: Basic realm="sample.site.org"
             <artwork>
       {
         "id": "1",
-        "name": "Chris Messina",
+        "displayName": "Chris Messina",
         "urls": [
           { "value": "http://factoryjoe.com/blog", "type": "blog" }
         ]
       },
       {
         "id": "2",
-        "name": "Joseph Smarr",
+        "displayName": "Joseph Smarr",
         "emails": [
           { "value": "joseph@plaxo.com", "type": "work", "primary": "true" },
           { "value": "jsmarr@gmail.com", "type": "home" }
@@ -276,7 +277,7 @@ WWW-Authenticate: Basic realm="sample.site.org"
             </artwork>
           </figure>
 
-            Given the parameters <spanx style="verb">filterBy=name&amp;filterOp=startswith&amp;filterValue=Chr</spanx>, only the first contact (with id=1) would match and be returned. However, with parameters <spanx style="verb">filterBy=name&amp;filterOp=present</spanx>, both contacts would be returned. Given the parameters <spanx style="verb">filterBy=email&amp;filterOp=contains&amp;filterValue=plaxo.com</spanx>, only the second contact (with id=2) would match, as would it be the only contact to match given the parameters <spanx style="verb">filterBy=email&amp;filterOp=present</spanx>.
+            Given the parameters <spanx style="verb">filterBy=displayName&amp;filterOp=startswith&amp;filterValue=Chr</spanx>, only the first contact (with id=1) would match and be returned. However, with parameters <spanx style="verb">filterBy=displayName&amp;filterOp=present</spanx>, both contacts would be returned. Given the parameters <spanx style="verb">filterBy=email&amp;filterOp=contains&amp;filterValue=plaxo.com</spanx>, only the second contact (with id=2) would match, as would it be the only contact to match given the parameters <spanx style="verb">filterBy=email&amp;filterOp=present</spanx>.
           </t>
           
           <t>
@@ -335,7 +336,7 @@ WWW-Authenticate: Basic realm="sample.site.org"
           </t>
         </section>
         
-        <section title="Declining to honor query parameters">
+        <section title="Declining to honor query parameters" anchor="declining">
           <t>
             Providers SHOULD honor all filtering, sorting, and pagination requests specified via Query Parameters. However, in some instances it may be too burdensome to comply with a particular request, e.g. because the Provider does not have an efficient database index set up for a given field that is requested for filtering or sorting, and is unable to efficiently fetch all data and post-process the results to honor the request before returning the response. In such cases, Providers MAY decline to honor the request (or specific pieces of the request). If any part of the request is declined, Providers MUST specify which part(s) of the request were declined in the response, using <spanx style="verb">"sorted": false</spanx>, <spanx style="verb">"filtered": false</spanx>, and/or <spanx style="verb">"updatedSince": false</spanx> as appropriate. For efficiency, Providers SHOULD omit these response fields if that part of the request was successfully performed, or if no such Query Parameter was specified in the request. 
           </t>
@@ -682,11 +683,11 @@ WWW-Authenticate: Basic realm="sample.site.org"
       <t>
         <figure>
           <artwork>
-http://sample.site.org/path/to/api/@me/@all?startIndex=10&count=10&sortBy=name
+http://sample.site.org/path/to/api/@me/@all?startIndex=10&count=10&sortBy=displayName
           </artwork>
         </figure>
       </t>
-      <t>Sample response:</t>
+      <t>Sample response (JSON):</t>
       <t>
         <figure>
           <artwork>
@@ -701,10 +702,10 @@ http://sample.site.org/path/to/api/@me/@all?startIndex=10&count=10&sortBy=name
     },
     {
       "id": "703887",
-      "displayName": "Mark Hashimoto",
+      "displayName": "Mork Hashimoto",
       "name": {
         "familyName": "Hashimoto",
-        "givenName": "Mark"
+        "givenName": "Mork"
       },
       "birthday": "0000-01-16",
       "gender": "male",
@@ -787,6 +788,99 @@ http://sample.site.org/path/to/api/@me/@all?startIndex=10&count=10&sortBy=name
 }
           </artwork>
         </figure>
+      </t>
+      <t>Sample response (XML):</t>
+      <t>
+        <figure>
+          <artwork>
+&lt;response>
+ &lt;startIndex>10&lt;/startIndex>
+ &lt;itemsPerPage>10&lt;/itemsPerPage>
+ &lt;totalResults>12&lt;/totalResults>
+ &lt;entry>
+  &lt;id>123&lt;/id>
+  &lt;displayName>Minimal Contact&lt;/displayName>
+ &lt;/entry>
+ &lt;entry>
+  &lt;id>703887&lt;/id>
+  &lt;displayName>Mork Hashimoto&lt;/displayName>
+  &lt;name>
+   &lt;familyName>Hashimoto&lt;/familyName>
+   &lt;givenName>Mork&lt;/givenName>
+  &lt;/name>
+  &lt;birthday>0000-01-16&lt;/birthday>
+  &lt;gender>male&lt;/gender>
+  &lt;drinker>heavily&lt;/drinker>
+  &lt;tags>plaxo guy&lt;/tags>
+  &lt;emails>
+   &lt;value>mhashimoto-04@plaxo.com&lt;/value>
+   &lt;type>work&lt;/type>
+   &lt;primary>true&lt;/primary>
+  &lt;/emails>
+  &lt;emails>
+   &lt;value>mhashimoto-04@plaxo.com&lt;/value>
+   &lt;type>home&lt;/type>
+  &lt;/emails>
+  &lt;emails>
+   &lt;value>mhashimoto@plaxo.com&lt;/value>
+   &lt;type>home&lt;/type>
+  &lt;/emails>
+  &lt;urls>
+   &lt;value>http://www.seeyellow.com&lt;/value>
+   &lt;type>work&lt;/type>
+  &lt;/urls>
+  &lt;urls>
+   &lt;value>http://www.angryalien.com&lt;/value>
+   &lt;type>home&lt;/type>
+  &lt;/urls>
+  &lt;phoneNumbers>
+   &lt;value>KLONDIKE5&lt;/value>
+   &lt;type>work&lt;/type>
+  &lt;/phoneNumbers>
+  &lt;phoneNumbers>
+   &lt;value>650-123-4567&lt;/value>
+   &lt;type>mobile&lt;/type>
+  &lt;/phoneNumbers>
+  &lt;photos>
+   &lt;value>http://sample.site.org/photos/12345.jpg&lt;/value>
+   &lt;type>thumbnail&lt;/type>
+  &lt;/photos>
+  &lt;ims>
+   &lt;value>plaxodev8&lt;/value>
+   &lt;type>aim&lt;/type>
+  &lt;/ims>
+  &lt;addresses>
+   &lt;type>home&lt;/type>
+   &lt;streetAddress>&lt;![CDATA[742 Evergreen Terrace
+Suite 123]]&gt;&lt;/streetAddress>
+   &lt;locality>Springfield&lt;/locality>
+   &lt;region>VT&lt;/region>
+   &lt;postalCode>12345&lt;/postalCode>
+   &lt;country>USA&lt;/country>
+   &lt;formatted>&lt;![CDATA[742 Evergreen Terrace
+Suite 123
+Springfield, VT 12345 USA]]&gt;&lt;/formatted>
+  &lt;/addresses>
+  &lt;organizations>
+   &lt;name>Burns Worldwide&lt;/name>
+   &lt;title>Head Bee Guy&lt;/title>
+  &lt;/organizations>
+  &lt;accounts>
+   &lt;domain>plaxo.com&lt;/domain>
+   &lt;userid>2706&lt;/userid>
+  &lt;/accounts>
+ &lt;/entry>
+&lt;/response>
+          </artwork>
+        </figure>
+      </t>
+    </appendix>
+    <appendix title="Compatibility with OpenSocial">
+      <t>
+        This version of the Portable Contacts specification is currently wire-compatible with the overlapping portion of the OpenSocial RESTful Protocol version 0.8.1 <xref target="OpenSocial" />. Specifically, <spanx style="emph">any compliant OpenSocial RESTful Protocol 0.8.1 Provider is also a compliant Portable Contacts Provider</spanx>, because they are specified to use the same Authorization methods (OAuth), Additional Path Information, Query Parameters, and Contact Schema. The OpenSocial and Portable Contacts communities chose to wire-align our respective specs in order to maximize widespread adoption of a single API for accessing people data.
+      </t>
+      <t>
+        It is our intention to maintain this compatibility going forward, so long as it is feasible, and so long as the changes required are compatible with the Goals and Approach of this spec. Although Portable Contacts is an independent spec, with a more limited scope than OpenSocial, any proposed changes to either this Portable Contacts spec or the OpenSocial RESTful Protocol should be considered in the context of both communities, and we should strive not to break compatibility unless it is truly necessary, e.g. if the goals of the two communities diverge significantly in the future.
       </t>
     </appendix>
 
@@ -901,12 +995,12 @@ http://sample.site.org/path/to/api/@me/@all?startIndex=10&count=10&sortBy=name
 
       <reference anchor="OpenSocial">
         <front>
-          <title>OpenSocial 0.8 RESTful API Specification</title>
+          <title>OpenSocial 0.8.1 RESTful Protocol Specification</title>
           <author initials="J.P." surname="Panzer" fullname="John Panzer">
             <organization />
           </author>
         </front>
-        <format type="HTML" target="http://code.google.com/apis/opensocial/docs/0.8/restfulspec.html" />
+        <format type="HTML" target="http://www.opensocial.org/Technical-Resources/opensocial-spec-v081/restful-protocol" />
       </reference>
 
     </references>
