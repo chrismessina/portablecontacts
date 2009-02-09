@@ -711,7 +711,8 @@ http://sample.site.org/path/to/api/@me/@all?startIndex=10&count=10&sortBy=displa
       "gender": "male",
       "drinker": "heavily",
       "tags": [
-        "plaxo guy"
+        "plaxo guy",
+        "favorite"
       ],
       "emails": [
         {
@@ -812,6 +813,7 @@ http://sample.site.org/path/to/api/@me/@all?startIndex=10&count=10&sortBy=displa
   &lt;gender>male&lt;/gender>
   &lt;drinker>heavily&lt;/drinker>
   &lt;tags>plaxo guy&lt;/tags>
+  &lt;tags>favorite&lt;/tags>
   &lt;emails>
    &lt;value>mhashimoto-04@plaxo.com&lt;/value>
    &lt;type>work&lt;/type>
