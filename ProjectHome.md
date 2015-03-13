@@ -1,0 +1,1 @@
+Like OAuth, we'll use a common svn repot to develop and store the spec document and code for PortableContacts. See http://portablecontacts.net for more info.
